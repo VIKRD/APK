@@ -14,11 +14,26 @@ import {
   useWindowDimensions,
   Switch,
   Alert,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
-// Текстовые локализации
+// Базовый каталог товаров по умолчанию
+const PRESET_PRODUCTS = [
+  { name: 'Молоко', unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200' },
+  { name: 'Хлеб', unit: 'шт', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200' },
+  { name: 'Яйца', unit: 'шт', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200' },
+  { name: 'Сыр', unit: 'г', image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=200' },
+  { name: 'Картофель', unit: 'кг', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200' },
+  { name: 'Яблоки', unit: 'кг', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200' },
+  { name: 'Кофе', unit: 'уп', image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200' },
+  { name: 'Вода', unit: 'л', image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=200' },
+  { name: 'Курица', unit: 'кг', image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=200' },
+  { name: 'Макароны', unit: 'уп', image: 'https://images.unsplash.com/photo-1551462147-37885acc36f1?w=200' },
+];
+
 const TRANSLATIONS = {
   ru: {
     title: 'МОИ СПИСКИ',
@@ -29,10 +44,12 @@ const TRANSLATIONS = {
     enterListName: 'Название списка',
     enterItemName: 'Название товара',
     enterQty: 'Количество',
-    photoUrl: 'URL-ссылка на фото товара',
+    photoUrl: 'URL-ссылка на фото',
+    pickGallery: 'Выбрать из галереи',
     save: 'Сохранить',
     cancel: 'Отмена',
     settings: 'Настройки',
+    language: 'Язык / Language',
     theme: 'Тема фона',
     textColor: 'Цвет текста',
     viewMode: 'Режим отображения',
@@ -40,7 +57,8 @@ const TRANSLATIONS = {
     markStyle: 'Стиль отмеченных товаров',
     markColor: 'Цвет (Красный/Зелёный)',
     markCheck: 'Галочка',
-    shareProduct: 'Поделиться товаром',
+    catalog: 'Каталог товаров',
+    selectFromCatalog: 'Выбрать из готовых продуктов',
     defaultListName: 'Мой первый список',
     defaultItems: [
       { id: '1', name: 'Молоко', count: 1, unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200', bought: false },
@@ -57,9 +75,11 @@ const TRANSLATIONS = {
     enterItemName: 'Item name',
     enterQty: 'Quantity',
     photoUrl: 'Photo URL',
+    pickGallery: 'Pick from gallery',
     save: 'Save',
     cancel: 'Cancel',
     settings: 'Settings',
+    language: 'Language',
     theme: 'Background Theme',
     textColor: 'Text Color',
     viewMode: 'View Mode',
@@ -67,7 +87,8 @@ const TRANSLATIONS = {
     markStyle: 'Marked items style',
     markColor: 'Color (Red/Green)',
     markCheck: 'Checkmark',
-    shareProduct: 'Share Product',
+    catalog: 'Product Catalog',
+    selectFromCatalog: 'Pick from preset items',
     defaultListName: 'My First List',
     defaultItems: [
       { id: '1', name: 'Milk', count: 1, unit: 'l', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200', bought: false },
@@ -95,7 +116,6 @@ export default function App() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  // Настройки
   const [lang, setLang] = useState('ru');
   const [themeKey, setThemeKey] = useState('dark');
   const [textColor, setTextColor] = useState('#00f0ff');
@@ -103,11 +123,9 @@ export default function App() {
   const [isViewLocked, setIsViewLocked] = useState(false);
   const [markStyle, setMarkStyle] = useState('color');
 
-  // Списки
   const [lists, setLists] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
 
-  // Модалки
   const [listModalVisible, setListModalVisible] = useState(false);
   const [listNameInput, setListNameInput] = useState('');
 
@@ -122,6 +140,7 @@ export default function App() {
   const [selectedItemForQty, setSelectedItemForQty] = useState(null);
   const [directQtyText, setDirectQtyText] = useState('');
 
+  const [catalogModalVisible, setCatalogModalVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
 
   const t = TRANSLATIONS[lang];
@@ -141,12 +160,12 @@ export default function App() {
       const savedMark = await AsyncStorage.getItem('@app_mark_style');
       const savedLists = await AsyncStorage.getItem('@app_grocery_lists_v2');
 
-      if (savedLang) setLang(savedLang);
-      if (savedTheme) setThemeKey(savedTheme);
-      if (savedColor) setTextColor(savedColor);
-      if (savedView) setViewMode(savedView);
+      if (savedLang) setLang(JSON.parse(savedLang));
+      if (savedTheme) setThemeKey(JSON.parse(savedTheme));
+      if (savedColor) setTextColor(JSON.parse(savedColor));
+      if (savedView) setViewMode(JSON.parse(savedView));
       if (savedLocked !== null) setIsViewLocked(JSON.parse(savedLocked));
-      if (savedMark) setMarkStyle(savedMark);
+      if (savedMark) setMarkStyle(JSON.parse(savedMark));
 
       if (savedLists) {
         setLists(JSON.parse(savedLists));
@@ -154,8 +173,8 @@ export default function App() {
         const initialLists = [
           {
             id: '1',
-            name: TRANSLATIONS[savedLang || 'ru'].defaultListName,
-            items: TRANSLATIONS[savedLang || 'ru'].defaultItems,
+            name: TRANSLATIONS[savedLang ? JSON.parse(savedLang) : 'ru'].defaultListName,
+            items: TRANSLATIONS[savedLang ? JSON.parse(savedLang) : 'ru'].defaultItems,
           },
         ];
         setLists(initialLists);
@@ -178,7 +197,47 @@ export default function App() {
 
   const currentList = lists.find((l) => l.id === currentListId);
 
-  // Списки
+  // Выбор картинки из галереи
+  const pickImageFromGallery = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Ошибка', 'Нужно разрешение на доступ к фото');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setItemImage(result.assets[0].uri);
+    }
+  };
+
+  const addPresetToCurrentList = (preset) => {
+    if (!currentListId) return;
+    const newItem = {
+      id: Date.now().toString(),
+      name: preset.name,
+      count: 1,
+      unit: preset.unit,
+      image: preset.image,
+      bought: false,
+    };
+
+    const updatedLists = lists.map((l) => {
+      if (l.id === currentListId) {
+        return { ...l, items: [...l.items, newItem] };
+      }
+      return l;
+    });
+
+    saveLists(updatedLists);
+    setCatalogModalVisible(false);
+  };
+
   const handleCreateList = () => {
     if (!listNameInput.trim()) return;
     const newList = { id: Date.now().toString(), name: listNameInput, items: [] };
@@ -202,7 +261,6 @@ export default function App() {
     ]);
   };
 
-  // Товары
   const handleSaveItem = () => {
     if (!itemName.trim() || !currentListId) return;
 
@@ -367,6 +425,12 @@ export default function App() {
         </View>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          {currentListId && (
+            <TouchableOpacity onPress={() => setCatalogModalVisible(true)}>
+              <Ionicons name="book-outline" size={24} color={textColor} />
+            </TouchableOpacity>
+          )}
+
           {!isViewLocked && (
             <TouchableOpacity
               onPress={() =>
@@ -389,7 +453,7 @@ export default function App() {
         </View>
       </View>
 
-      {/* ЭКРАН 1: СПИСКИ ПОКУПОК */}
+      {/* Списки */}
       {!currentListId ? (
         <FlatList
           data={lists}
@@ -419,7 +483,7 @@ export default function App() {
           )}
         />
       ) : (
-        /* ЭКРАН 2: ТОВАРЫ В СПИСКЕ */
+        /* Товары */
         <FlatList
           key={`${viewMode}-${numColumns}`}
           data={currentList.items}
@@ -583,7 +647,7 @@ export default function App() {
         />
       )}
 
-      {/* Кнопка добавления */}
+      {/* Кнопка плюс */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: textColor }]}
         onPress={() => {
@@ -598,7 +662,7 @@ export default function App() {
         <Ionicons name="add" size={32} color="#080a0d" />
       </TouchableOpacity>
 
-      {/* Модалка списка */}
+      {/* Модалка создания списка */}
       <Modal visible={listModalVisible} animationType="slide" transparent>
         <View style={styles.modalBg}>
           <View style={styles.modalContent}>
@@ -628,11 +692,22 @@ export default function App() {
         </View>
       </Modal>
 
-      {/* Модалка товара */}
+      {/* Модалка добавления товара */}
       <Modal visible={itemModalVisible} animationType="slide" transparent>
         <View style={styles.modalBg}>
           <View style={styles.modalContent}>
             <Text style={styles.modalHeader}>{editingItemId ? t.editItem : t.addItem}</Text>
+
+            <TouchableOpacity
+              style={[styles.catalogBtn, { borderColor: textColor }]}
+              onPress={() => {
+                setItemModalVisible(false);
+                setCatalogModalVisible(true);
+              }}
+            >
+              <Ionicons name="book-outline" size={18} color={textColor} />
+              <Text style={{ color: textColor, fontWeight: 'bold' }}>{t.selectFromCatalog}</Text>
+            </TouchableOpacity>
 
             <TextInput
               style={styles.input}
@@ -642,13 +717,21 @@ export default function App() {
               onChangeText={setItemName}
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder={t.photoUrl}
-              placeholderTextColor="#666"
-              value={itemImage}
-              onChangeText={setItemImage}
-            />
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+              <TextInput
+                style={[styles.input, { flex: 1, marginBottom: 0 }]}
+                placeholder={t.photoUrl}
+                placeholderTextColor="#666"
+                value={itemImage}
+                onChangeText={setItemImage}
+              />
+              <TouchableOpacity
+                style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
+                onPress={pickImageFromGallery}
+              >
+                <Ionicons name="image-outline" size={20} color="#080a0d" />
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.unitContainer}>
               {['г', 'кг', 'шт', 'л', 'мл', 'уп'].map((u) => (
@@ -682,7 +765,37 @@ export default function App() {
         </View>
       </Modal>
 
-      {/* Модалка количества */}
+      {/* Модалка Каталога готовых товаров */}
+      <Modal visible={catalogModalVisible} animationType="slide" transparent>
+        <View style={styles.modalBg}>
+          <View style={[styles.modalContent, { height: '80%' }]}>
+            <Text style={styles.modalHeader}>{t.catalog}</Text>
+            <ScrollView style={{ flex: 1, marginVertical: 10 }}>
+              {PRESET_PRODUCTS.map((p, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  style={styles.catalogCard}
+                  onPress={() => addPresetToCurrentList(p)}
+                >
+                  <Image source={{ uri: p.image }} style={styles.catalogImage} />
+                  <Text style={styles.catalogTitle}>{p.name}</Text>
+                  <Ionicons name="add-circle-outline" size={24} color={textColor} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity
+              onPress={() => setCatalogModalVisible(false)}
+              style={[styles.btnSave, { backgroundColor: textColor, alignSelf: 'center', width: '100%' }]}
+            >
+              <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
+                {t.cancel}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Модалка смены количества */}
       <Modal visible={qtyModalVisible} animationType="fade" transparent>
         <View style={styles.modalBg}>
           <View style={[styles.modalContent, { width: '80%' }]}>
@@ -717,6 +830,24 @@ export default function App() {
         <View style={styles.modalBg}>
           <View style={styles.modalContent}>
             <Text style={styles.modalHeader}>{t.settings}</Text>
+
+            <Text style={styles.sectionLabel}>{t.language}</Text>
+            <View style={styles.rowPicker}>
+              {['ru', 'en'].map((l) => (
+                <TouchableOpacity
+                  key={l}
+                  style={[
+                    styles.chip,
+                    lang === l && { backgroundColor: textColor },
+                  ]}
+                  onPress={() => saveSetting('@app_lang', l, setLang)}
+                >
+                  <Text style={{ color: lang === l ? '#000' : '#fff' }}>
+                    {l.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <Text style={styles.sectionLabel}>{t.theme}</Text>
             <View style={styles.rowPicker}>
@@ -761,7 +892,7 @@ export default function App() {
                 onPress={() => saveSetting('@app_view_mode', 'grid', setViewMode)}
               >
                 <Text style={{ color: viewMode === 'grid' ? '#000' : '#fff' }}>
-                  Плитка (Кубики)
+                  Плитка
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -924,6 +1055,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 15,
   },
+  catalogBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+  },
+  catalogCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff11',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  catalogImage: { width: 40, height: 40, borderRadius: 6, marginRight: 12 },
+  catalogTitle: { color: '#fff', flex: 1, fontSize: 15, fontWeight: '500' },
+
   unitContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
   unitBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: '#ffffff11' },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },

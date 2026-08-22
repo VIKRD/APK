@@ -3,6 +3,7 @@
     "name": "GroceryApp",
     "slug": "grocery-app",
     "version": "1.0.0",
+    "owner": "asosalitys-team",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",

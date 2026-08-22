@@ -1,12 +1,12 @@
 {
-  "expo": {
-    "name": "GroceryApp",
-    "slug": "grocery-app",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "userInterfaceStyle": "automatic",
-    "android": {
-      "package": "com.mygrocery.app"
+  "cli": {
+    "version": ">= 7.0.0"
+  },
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
     }
   }
 }

@@ -4,7 +4,7 @@
     "slug": "vikrd19",
     "owner": "asosalitys-team",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",,
     "userInterfaceStyle": "dark",
     "splash": {
       "resizeMode": "contain",

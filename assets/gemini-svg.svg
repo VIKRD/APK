@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1024" height="1024">
+  <defs>
+    <!-- Зелёное свечение по внешнему краю плашки -->
+    <filter id="cardGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="15" flood-color="#00ff88" flood-opacity="0.9"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="30" flood-color="#00ff88" flood-opacity="0.6"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="50" flood-color="#00ffaa" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Тёмный фон приложения -->
+  <rect width="512" height="512" fill="#080a0d"/>
+
+  <!-- Белая иконка-карточка с зеленым свечением по краям -->
+  <rect x="106" y="106" width="300" height="300" rx="64" fill="#ffffff" filter="url(#cardGlow)"/>
+
+  <!-- Чёрная тележка с галочкой внутри -->
+  <g fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Ручка и корпус тележки -->
+    <path d="M175 180h160l-22 95H197L175 180z" stroke-width="12"/>
+    <path d="M145 150h30l22 125h125" stroke-width="12"/>
+    
+    <!-- Колёса -->
+    <circle cx="212" cy="320" r="13" fill="#000000" stroke="none"/>
+    <circle cx="292" cy="320" r="13" fill="#000000" stroke="none"/>
+
+    <!-- Галочка в центре -->
+    <path d="M220 225l25 25 45-45" stroke-width="15"/>
+  </g>
+</svg>

@@ -13,11 +13,13 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.groceryapp",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Приложению нужен доступ к галерее для выбора фото товаров."
       }
     },
     "android": {
+      "package": "com.anonymous.groceryapp",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#080a0d"

@@ -6,951 +6,451 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
+  Image,
   Modal,
   SafeAreaView,
-  StatusBar,
-  Share,
-  Image,
-  useWindowDimensions,
-  Switch,
-  Alert,
   ScrollView,
+  Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 
-// Базовый каталог товаров по умолчанию
-const PRESET_PRODUCTS = [
-  { name: 'Молоко', unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200' },
-  { name: 'Хлеб', unit: 'шт', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200' },
-  { name: 'Яйца', unit: 'шт', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200' },
-  { name: 'Сыр', unit: 'г', image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=200' },
-  { name: 'Картофель', unit: 'кг', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200' },
-  { name: 'Яблоки', unit: 'кг', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200' },
-  { name: 'Кофе', unit: 'уп', image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200' },
-  { name: 'Вода', unit: 'л', image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=200' },
-  { name: 'Курица', unit: 'кг', image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=200' },
-  { name: 'Макароны', unit: 'уп', image: 'https://images.unsplash.com/photo-1551462147-37885acc36f1?w=200' },
+// Начальная библиотека популярных продуктов (Украинский ассортимент + Бакалея)
+const INITIAL_LIBRARY = [
+  // Мясо и Колбасы
+  { id: 'm1', name: 'Свинина', category: 'Мясо', image: null },
+  { id: 'm2', name: 'Сало', category: 'Мясо', image: null },
+  { id: 'm3', name: 'Индейка', category: 'Мясо', image: null },
+  { id: 'm4', name: 'Курица', category: 'Мясо', image: null },
+  { id: 'm5', name: 'Колбаса', category: 'Мясо', image: null },
+  
+  // Овощи
+  { id: 'v1', name: 'Лук репчатый', category: 'Овощи', image: null },
+  { id: 'v2', name: 'Лук зеленый (стручковой)', category: 'Овощи', image: null },
+  { id: 'v3', name: 'Чеснок', category: 'Овощи', image: null },
+  { id: 'v4', name: 'Перец болгарский', category: 'Овощи', image: null },
+  { id: 'v5', name: 'Помидоры', category: 'Овощи', image: null },
+  { id: 'v6', name: 'Помидоры черри', category: 'Овощи', image: null },
+  { id: 'v7', name: 'Помидоры сливка', category: 'Овощи', image: null },
+  { id: 'v8', name: 'Огурцы', category: 'Овощи', image: null },
+  { id: 'v9', name: 'Огурцы гладкие', category: 'Овощи', image: null },
+  { id: 'v10', name: 'Картошка', category: 'Овощи', image: null },
+
+  // Фрукты и Ягоды
+  { id: 'f1', name: 'Яблоки', category: 'Фрукты', image: null },
+  { id: 'f2', name: 'Персики', category: 'Фрукты', image: null },
+  { id: 'f3', name: 'Сливы', category: 'Фрукты', image: null },
+  { id: 'f4', name: 'Виноград', category: 'Фрукты', image: null },
+  { id: 'f5', name: 'Авокадо', category: 'Фрукты', image: null },
+  { id: 'f6', name: 'Нектарин', category: 'Фрукты', image: null },
+  { id: 'f7', name: 'Абрикосы', category: 'Фрукты', image: null },
+  { id: 'f8', name: 'Малина', category: 'Фрукты', image: null },
+  { id: 'f9', name: 'Голубика (Лохина)', category: 'Фрукты', image: null },
+
+  // Бакалея и Крупы
+  { id: 'g1', name: 'Гречка', category: 'Бакалея', image: null },
+  { id: 'g2', name: 'Пшено', category: 'Бакалея', image: null },
+  { id: 'g3', name: 'Геркулес', category: 'Бакалея', image: null },
+  { id: 'g4', name: 'Рис', category: 'Бакалея', image: null },
+  { id: 'g5', name: 'Рис Басмати', category: 'Бакалея', image: null },
+  { id: 'g6', name: 'Вермишель Спагетти', category: 'Бакалея', image: null },
+  { id: 'g7', name: 'Вермишель Рожки', category: 'Бакалея', image: null },
+  { id: 'g8', name: 'Вермишель Вермишелька', category: 'Бакалея', image: null },
+
+  // Консервы и Деликатесы
+  { id: 'c1', name: 'Тушенка куриная', category: 'Консервы', image: null },
+  { id: 'c2', name: 'Тушенка свиная', category: 'Консервы', image: null },
+  { id: 'c3', name: 'Тушенка говяжья', category: 'Консервы', image: null },
+  { id: 'c4', name: 'Килька в томате', category: 'Консервы', image: null },
+  { id: 'c5', name: 'Бычки в томате', category: 'Консервы', image: null },
+  { id: 'c6', name: 'Сайра', category: 'Консервы', image: null },
+  { id: 'c7', name: 'Красная рыба консервированная', category: 'Консервы', image: null },
+  { id: 'c8', name: 'Икра красная', category: 'Консервы', image: null },
+  { id: 'c9', name: 'Икра черная', category: 'Консервы', image: null },
+
+  // Напитки
+  { id: 'd1', name: 'Пиво', category: 'Напитки', image: null },
+  { id: 'd2', name: 'Пепси', category: 'Напитки', image: null },
+  { id: 'd3', name: 'Кола', category: 'Напитки', image: null },
+  { id: 'd4', name: 'Фанта', category: 'Напитки', image: null },
+  { id: 'd5', name: 'Спрайт', category: 'Напитки', image: null },
+  { id: 'd6', name: 'Байкал', category: 'Напитки', image: null },
+  { id: 'd7', name: 'Живчик', category: 'Напитки', image: null },
+  { id: 'j1', name: 'Сок томатный', category: 'Напитки', image: null },
+  { id: 'j2', name: 'Сок виноградно-яблочный', category: 'Напитки', image: null },
+  { id: 'j3', name: 'Сок яблочный', category: 'Напитки', image: null },
+  { id: 'j4', name: 'Сок апельсиновый', category: 'Напитки', image: null },
 ];
 
-const TRANSLATIONS = {
-  ru: {
-    title: 'МОИ СПИСКИ',
-    shareHeader: '🛒 СПИСОК ПОКУПОК:',
-    addList: 'Создать список',
-    addItem: 'Добавить товар',
-    editItem: 'Изменить товар',
-    enterListName: 'Название списка',
-    enterItemName: 'Название товара',
-    enterQty: 'Количество',
-    photoUrl: 'URL-ссылка на фото',
-    pickGallery: 'Выбрать из галереи',
-    save: 'Сохранить',
-    cancel: 'Отмена',
-    settings: 'Настройки',
-    language: 'Язык / Language',
-    theme: 'Тема фона',
-    textColor: 'Цвет текста',
-    viewMode: 'Режим отображения',
-    lockViewMode: 'Заблокировать смену вида в шапке',
-    markStyle: 'Стиль отмеченных товаров',
-    markColor: 'Цвет (Красный/Зелёный)',
-    markCheck: 'Галочка',
-    catalog: 'Каталог товаров',
-    selectFromCatalog: 'Выбрать из готовых продуктов',
-    defaultListName: 'Мой первый список',
-    defaultItems: [
-      { id: '1', name: 'Молоко', count: 1, unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200', bought: false },
-      { id: '2', name: 'Картофель', count: 2, unit: 'кг', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200', bought: false },
-    ],
-  },
-  en: {
-    title: 'MY LISTS',
-    shareHeader: '🛒 GROCERY LIST:',
-    addList: 'Create List',
-    addItem: 'Add Item',
-    editItem: 'Edit Item',
-    enterListName: 'List name',
-    enterItemName: 'Item name',
-    enterQty: 'Quantity',
-    photoUrl: 'Photo URL',
-    pickGallery: 'Pick from gallery',
-    save: 'Save',
-    cancel: 'Cancel',
-    settings: 'Settings',
-    language: 'Language',
-    theme: 'Background Theme',
-    textColor: 'Text Color',
-    viewMode: 'View Mode',
-    lockViewMode: 'Lock view switcher in header',
-    markStyle: 'Marked items style',
-    markColor: 'Color (Red/Green)',
-    markCheck: 'Checkmark',
-    catalog: 'Product Catalog',
-    selectFromCatalog: 'Pick from preset items',
-    defaultListName: 'My First List',
-    defaultItems: [
-      { id: '1', name: 'Milk', count: 1, unit: 'l', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200', bought: false },
-      { id: '2', name: 'Potato', count: 2, unit: 'kg', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200', bought: false },
-    ],
-  },
-};
-
-const THEMES = {
-  dark: { bg: '#080a0d', cardBg: '#ffffff0a', border: '#ffffff15' },
-  gray: { bg: '#1e222b', cardBg: '#ffffff10', border: '#ffffff22' },
-  light: { bg: '#f4f5f7', cardBg: '#ffffff', border: '#00000010' },
-};
-
-const TEXT_COLORS = [
-  { label: 'Белый', value: '#ffffff' },
-  { label: 'Голубой', value: '#00f0ff' },
-  { label: 'Синий', value: '#007AFF' },
-  { label: 'Жёлтый', value: '#ffd700' },
-  { label: 'Серый', value: '#a0a5b5' },
-  { label: 'Чёрный', value: '#000000' },
-];
+const CATEGORIES = ['Все', 'Мясо', 'Овощи', 'Фрукты', 'Бакалея', 'Консервы', 'Напитки', 'Другое'];
 
 export default function App() {
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-
-  const [lang, setLang] = useState('ru');
-  const [themeKey, setThemeKey] = useState('dark');
-  const [textColor, setTextColor] = useState('#00f0ff');
-  const [viewMode, setViewMode] = useState('grid');
-  const [isViewLocked, setIsViewLocked] = useState(false);
-  const [markStyle, setMarkStyle] = useState('color');
-
-  const [lists, setLists] = useState([]);
-  const [currentListId, setCurrentListId] = useState(null);
-
-  const [listModalVisible, setListModalVisible] = useState(false);
-  const [listNameInput, setListNameInput] = useState('');
-
-  const [itemModalVisible, setItemModalVisible] = useState(false);
-  const [itemName, setItemName] = useState('');
-  const [itemCount, setItemCount] = useState('1');
-  const [itemUnit, setItemUnit] = useState('шт');
-  const [itemImage, setItemImage] = useState('');
-  const [editingItemId, setEditingItemId] = useState(null);
-
-  const [qtyModalVisible, setQtyModalVisible] = useState(false);
-  const [selectedItemForQty, setSelectedItemForQty] = useState(null);
-  const [directQtyText, setDirectQtyText] = useState('');
-
-  const [catalogModalVisible, setCatalogModalVisible] = useState(false);
-  const [settingsVisible, setSettingsVisible] = useState(false);
-
-  const t = TRANSLATIONS[lang];
-  const currentTheme = THEMES[themeKey];
+  const [library, setLibrary] = useState([]);
+  const [shoppingList, setShoppingList] = useState([]);
+  
+  // Состояния UI
+  const [activeTab, setActiveTab] = useState('list'); // 'list' | 'library'
+  const [selectedCategory, setSelectedCategory] = useState('Все');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Для добавления/редактирования
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemCategory, setNewItemCategory] = useState('Другое');
+  const [newItemImage, setNewItemImage] = useState(null);
 
   useEffect(() => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    saveData();
+  }, [library, shoppingList]);
+
   const loadData = async () => {
     try {
-      const savedLang = await AsyncStorage.getItem('@app_lang');
-      const savedTheme = await AsyncStorage.getItem('@app_theme_key');
-      const savedColor = await AsyncStorage.getItem('@app_text_color');
-      const savedView = await AsyncStorage.getItem('@app_view_mode');
-      const savedLocked = await AsyncStorage.getItem('@app_view_locked');
-      const savedMark = await AsyncStorage.getItem('@app_mark_style');
-      const savedLists = await AsyncStorage.getItem('@app_grocery_lists_v2');
-
-      if (savedLang) setLang(JSON.parse(savedLang));
-      if (savedTheme) setThemeKey(JSON.parse(savedTheme));
-      if (savedColor) setTextColor(JSON.parse(savedColor));
-      if (savedView) setViewMode(JSON.parse(savedView));
-      if (savedLocked !== null) setIsViewLocked(JSON.parse(savedLocked));
-      if (savedMark) setMarkStyle(JSON.parse(savedMark));
-
-      if (savedLists) {
-        setLists(JSON.parse(savedLists));
+      const savedLib = await AsyncStorage.getItem('@grocery_library');
+      const savedList = await AsyncStorage.getItem('@grocery_shopping_list');
+      
+      if (savedLib) {
+        setLibrary(JSON.parse(savedLib));
       } else {
-        const initialLists = [
-          {
-            id: '1',
-            name: TRANSLATIONS[savedLang ? JSON.parse(savedLang) : 'ru'].defaultListName,
-            items: TRANSLATIONS[savedLang ? JSON.parse(savedLang) : 'ru'].defaultItems,
-          },
-        ];
-        setLists(initialLists);
-        await AsyncStorage.setItem('@app_grocery_lists_v2', JSON.stringify(initialLists));
+        setLibrary(INITIAL_LIBRARY);
+      }
+      if (savedList) {
+        setShoppingList(JSON.parse(savedList));
       }
     } catch (e) {
-      console.error(e);
+      console.error('Ошибка загрузки данных', e);
     }
   };
 
-  const saveLists = async (newLists) => {
-    setLists(newLists);
-    await AsyncStorage.setItem('@app_grocery_lists_v2', JSON.stringify(newLists));
+  const saveData = async () => {
+    try {
+      await AsyncStorage.setItem('@grocery_library', JSON.stringify(library));
+      await AsyncStorage.setItem('@grocery_shopping_list', JSON.stringify(shoppingList));
+    } catch (e) {
+      console.error('Ошибка сохранения данных', e);
+    }
   };
-
-  const saveSetting = async (key, value, setter) => {
-    setter(value);
-    await AsyncStorage.setItem(key, JSON.stringify(value));
-  };
-
-  const currentList = lists.find((l) => l.id === currentListId);
 
   // Выбор картинки из галереи
-  const pickImageFromGallery = async () => {
+  const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert('Ошибка', 'Нужно разрешение на доступ к фото');
+      Alert.alert('Доступ запрещен', 'Разрешите доступ к фото в настройках устройства.');
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      quality: 0.7,
+      aspect: [1, 1],
+      quality: 0.5,
     });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setItemImage(result.assets[0].uri);
+    if (!result.canceled) {
+      setNewItemImage(result.assets[0].uri);
     }
   };
 
-  const addPresetToCurrentList = (preset) => {
-    if (!currentListId) return;
-    const newItem = {
-      id: Date.now().toString(),
-      name: preset.name,
-      count: 1,
-      unit: preset.unit,
-      image: preset.image,
-      bought: false,
-    };
+  // Добавление в библиотеку и в список
+  const handleAddItem = () => {
+    const trimmedName = newItemName.trim();
+    if (!trimmedName) return;
 
-    const updatedLists = lists.map((l) => {
-      if (l.id === currentListId) {
-        return { ...l, items: [...l.items, newItem] };
-      }
-      return l;
+    // 1. Проверяем дубликаты в списке покупок
+    const existingInList = shoppingList.find(i => i.name.toLowerCase() === trimmedName.toLowerCase());
+    if (existingInList) {
+      Alert.alert('Продукт уже в корзине!', `Товар "${trimmedName}" уже добавлен в ваш список покупок.`);
+      return;
+    }
+
+    // 2. Ищем или создаем товар в библиотеке
+    let libItem = library.find(i => i.name.toLowerCase() === trimmedName.toLowerCase());
+    let updatedLibrary = [...library];
+
+    if (!libItem) {
+      libItem = {
+        id: Date.now().toString(),
+        name: trimmedName,
+        category: newItemCategory,
+        image: newItemImage
+      };
+      updatedLibrary.push(libItem);
+    } else if (newItemImage && libItem.image !== newItemImage) {
+      // Если фото изменили — обновляем в библиотеке
+      libItem = { ...libItem, image: newItemImage };
+      updatedLibrary = updatedLibrary.map(i => i.id === libItem.id ? libItem : i);
+    }
+
+    setLibrary(updatedLibrary);
+
+    // 3. Добавляем в список покупок
+    setShoppingList([...shoppingList, { id: Date.now().toString(), libraryId: libItem.id, name: libItem.name, checked: false }]);
+    
+    // Сброс формы
+    setNewItemName('');
+    setNewItemImage(null);
+    setModalVisible(false);
+  };
+
+  // Изменить фото у существующго товара из Библиотеки
+  const updateProductImage = async (libId) => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Ошибка', 'Нет доступа к галерее');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
     });
-
-    saveLists(updatedLists);
-    setCatalogModalVisible(false);
+    if (!result.canceled) {
+      const newUri = result.assets[0].uri;
+      // Синхронно обновляем изображение в библиотеке (автоматически обновит и все списки!)
+      setLibrary(library.map(item => item.id === libId ? { ...item, image: newUri } : item));
+    }
   };
 
-  const handleCreateList = () => {
-    if (!listNameInput.trim()) return;
-    const newList = { id: Date.now().toString(), name: listNameInput, items: [] };
-    saveLists([...lists, newList]);
-    setListNameInput('');
-    setListModalVisible(false);
+  // Добавить товар из Библиотеки в список покупок (с защитой от дублей)
+  const addFromLibraryToList = (libItem) => {
+    const isAlreadyInList = shoppingList.some(i => i.name.toLowerCase() === libItem.name.toLowerCase());
+    if (isAlreadyInList) {
+      Alert.alert('Уже в списке', `"${libItem.name}" уже добавлен в корзину.`);
+      return;
+    }
+    setShoppingList([...shoppingList, { id: Date.now().toString(), libraryId: libItem.id, name: libItem.name, checked: false }]);
   };
 
-  const deleteList = (id) => {
-    Alert.alert('Удалить список?', 'Все товары в нём будут удалены.', [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Удалить',
-        style: 'destructive',
-        onPress: () => {
-          const updated = lists.filter((l) => l.id !== id);
-          saveLists(updated);
-          if (currentListId === id) setCurrentListId(null);
-        },
-      },
-    ]);
-  };
-
-  const handleSaveItem = () => {
-    if (!itemName.trim() || !currentListId) return;
-
-    const updatedLists = lists.map((list) => {
-      if (list.id === currentListId) {
-        if (editingItemId) {
-          const updatedItems = list.items.map((i) =>
-            i.id === editingItemId
-              ? {
-                  ...i,
-                  name: itemName,
-                  count: parseFloat(itemCount) || 1,
-                  unit: itemUnit,
-                  image: itemImage,
-                }
-              : i
-          );
-          return { ...list, items: updatedItems };
-        } else {
-          const newItem = {
-            id: Date.now().toString(),
-            name: itemName,
-            count: parseFloat(itemCount) || 1,
-            unit: itemUnit,
-            image: itemImage,
-            bought: false,
-          };
-          return { ...list, items: [...list.items, newItem] };
+  // Удалить из библиотеки
+  const deleteFromLibrary = (libId) => {
+    Alert.alert(
+      'Удалить из библиотеки?',
+      'Товар полностью удалится из общего каталога.',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        { 
+          text: 'Удалить', 
+          style: 'destructive', 
+          onPress: () => {
+            setLibrary(library.filter(i => i.id !== libId));
+          } 
         }
-      }
-      return list;
-    });
-
-    saveLists(updatedLists);
-    closeItemModal();
+      ]
+    );
   };
 
-  const deleteItem = (itemId) => {
-    const updatedLists = lists.map((list) => {
-      if (list.id === currentListId) {
-        return { ...list, items: list.items.filter((i) => i.id !== itemId) };
-      }
-      return list;
-    });
-    saveLists(updatedLists);
+  // Чекбокс выполнения
+  const toggleCheck = (id) => {
+    setShoppingList(shoppingList.map(item => item.id === id ? { ...item, checked: !item.checked } : item));
   };
 
-  const toggleBought = (itemId) => {
-    const updatedLists = lists.map((list) => {
-      if (list.id === currentListId) {
-        const updatedItems = list.items.map((i) =>
-          i.id === itemId ? { ...i, bought: !i.bought } : i
-        );
-        return { ...list, items: updatedItems };
-      }
-      return list;
-    });
-    saveLists(updatedLists);
+  // Удалить из списка покупок
+  const deleteFromList = (id) => {
+    setShoppingList(shoppingList.filter(item => item.id !== id));
   };
 
-  const changeCount = (itemId, delta) => {
-    const updatedLists = lists.map((list) => {
-      if (list.id === currentListId) {
-        const updatedItems = list.items.map((i) => {
-          if (i.id === itemId) {
-            return { ...i, count: Math.max(1, i.count + delta) };
-          }
-          return i;
-        });
-        return { ...list, items: updatedItems };
-      }
-      return list;
-    });
-    saveLists(updatedLists);
+  // Очистить купленное
+  const clearChecked = () => {
+    setShoppingList(shoppingList.filter(item => !item.checked));
   };
 
-  const openEditItemModal = (item) => {
-    setEditingItemId(item.id);
-    setItemName(item.name);
-    setItemCount(item.count.toString());
-    setItemUnit(item.unit || 'шт');
-    setItemImage(item.image || '');
-    setItemModalVisible(true);
-  };
-
-  const closeItemModal = () => {
-    setItemModalVisible(false);
-    setEditingItemId(null);
-    setItemName('');
-    setItemCount('1');
-    setItemUnit('шт');
-    setItemImage('');
-  };
-
-  const saveDirectQty = () => {
-    if (!selectedItemForQty || !currentListId) return;
-    const val = parseFloat(directQtyText);
-    if (!isNaN(val) && val > 0) {
-      const updatedLists = lists.map((list) => {
-        if (list.id === currentListId) {
-          const updatedItems = list.items.map((i) =>
-            i.id === selectedItemForQty.id ? { ...i, count: val } : i
-          );
-          return { ...list, items: updatedItems };
-        }
-        return list;
-      });
-      saveLists(updatedLists);
-    }
-    setQtyModalVisible(false);
-  };
-
-  const shareList = async () => {
-    if (!currentList || currentList.items.length === 0) return;
-    const unbought = currentList.items.filter((i) => !i.bought);
-    const bought = currentList.items.filter((i) => i.bought);
-
-    let text = `${t.shareHeader} ${currentList.name}\n\n`;
-    if (unbought.length > 0) {
-      text += unbought.map((i) => `• ${i.name} — ${i.count} ${i.unit}`).join('\n');
-    }
-    if (bought.length > 0) {
-      text += `\n\nКуплено:\n` + bought.map((i) => `✓ ${i.name}`).join('\n');
-    }
-
-    try {
-      await Share.share({ message: text });
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const shareSingleProduct = async (item) => {
-    let msg = `Купи, пожалуйста: ${item.name} (${item.count} ${item.unit})`;
-    if (item.image) {
-      msg += `\nСсылка на фото: ${item.image}`;
-    }
-    try {
-      await Share.share({ message: msg });
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const numColumns = viewMode === 'list' ? 1 : width > 900 ? 4 : isLandscape || width > 600 ? 3 : 2;
+  // Фильтрация библиотеки
+  const filteredLibrary = library.filter(item => {
+    const matchesCat = selectedCategory === 'Все' || item.category === selectedCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.bg }]}>
-      <StatusBar barStyle={themeKey === 'light' ? 'dark-content' : 'light-content'} />
-
+    <SafeAreaView style={styles.container}>
       {/* Шапка */}
-      <View style={[styles.header, { borderBottomColor: currentTheme.border }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          {currentListId && (
-            <TouchableOpacity onPress={() => setCurrentListId(null)}>
-              <Ionicons name="arrow-back" size={24} color={textColor} />
-            </TouchableOpacity>
-          )}
-          <Text style={[styles.headerTitle, { color: textColor }]}>
-            {currentList ? currentList.name : t.title}
-          </Text>
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          {currentListId && (
-            <TouchableOpacity onPress={() => setCatalogModalVisible(true)}>
-              <Ionicons name="book-outline" size={24} color={textColor} />
-            </TouchableOpacity>
-          )}
-
-          {!isViewLocked && (
-            <TouchableOpacity
-              onPress={() =>
-                saveSetting('@app_view_mode', viewMode === 'grid' ? 'list' : 'grid', setViewMode)
-              }
-            >
-              <Ionicons name={viewMode === 'grid' ? 'list' : 'grid'} size={24} color={textColor} />
-            </TouchableOpacity>
-          )}
-
-          {currentListId && (
-            <TouchableOpacity onPress={shareList}>
-              <Ionicons name="share-social-outline" size={24} color={textColor} />
-            </TouchableOpacity>
-          )}
-
-          <TouchableOpacity onPress={() => setSettingsVisible(true)}>
-            <Ionicons name="settings-outline" size={24} color={textColor} />
-          </TouchableOpacity>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Продукты 🛒</Text>
+        <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+          <Ionicons name="add" size={26} color="#080a0d" />
+        </TouchableOpacity>
       </View>
 
-      {/* Списки */}
-      {!currentListId ? (
-        <FlatList
-          data={lists}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.listFolderCard,
-                { backgroundColor: currentTheme.cardBg, borderColor: currentTheme.border },
-              ]}
-              onPress={() => setCurrentListId(item.id)}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <Ionicons name="folder-open-outline" size={28} color={textColor} />
-                <View>
-                  <Text style={[styles.folderTitle, { color: textColor }]}>{item.name}</Text>
-                  <Text style={{ color: '#888', fontSize: 13 }}>
-                    Товаров: {item.items.length}
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity onPress={() => deleteList(item.id)}>
-                <Ionicons name="trash-outline" size={20} color="#ff4444" />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          )}
-        />
-      ) : (
-        /* Товары */
-        <FlatList
-          key={`${viewMode}-${numColumns}`}
-          data={currentList.items}
-          numColumns={numColumns}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 12 }}
-          renderItem={({ item }) => {
-            const isColorStyle = markStyle === 'color';
-            const cardBorderColor = isColorStyle
-              ? item.bought
-                ? '#2e7d32'
-                : '#c62828'
-              : currentTheme.border;
+      {/* Переключатель вкладок */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'list' && styles.activeTab]} 
+          onPress={() => setActiveTab('list')}
+        >
+          <Text style={[styles.tabText, activeTab === 'list' && styles.activeTabText]}>
+            Список ({shoppingList.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'library' && styles.activeTab]} 
+          onPress={() => setActiveTab('library')}
+        >
+          <Text style={[styles.tabText, activeTab === 'library' && styles.activeTabText]}>
+            Библиотека ({library.length})
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-            if (viewMode === 'grid') {
+      {/* ЭКРАН 1: СПИСОК ПОКУПОК */}
+      {activeTab === 'list' && (
+        <View style={{ flex: 1 }}>
+          <FlatList
+            data={shoppingList}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listPadding}
+            renderItem={({ item }) => {
+              const libData = library.find(l => l.id === item.libraryId || l.name === item.name);
               return (
-                <View
-                  style={[
-                    styles.gridCard,
-                    {
-                      backgroundColor: currentTheme.cardBg,
-                      borderColor: cardBorderColor,
-                      borderWidth: isColorStyle ? 2 : 1,
-                      flex: 1 / numColumns,
-                    },
-                    !isColorStyle && item.bought && styles.cardBought,
-                  ]}
-                >
-                  <TouchableOpacity
-                    onPress={() => toggleBought(item.id)}
-                    style={styles.gridImageArea}
-                  >
-                    {item.image ? (
-                      <Image source={{ uri: item.image }} style={styles.gridImage} />
-                    ) : (
-                      <View style={[styles.gridImagePlaceholder, { borderColor: textColor }]}>
-                        <Ionicons name="basket-outline" size={30} color={textColor} />
-                      </View>
-                    )}
-
-                    {!isColorStyle && item.bought && (
-                      <View style={styles.checkOverlay}>
-                        <Ionicons name="checkmark-circle" size={36} color={textColor} />
-                      </View>
-                    )}
-                  </TouchableOpacity>
-
-                  <Text numberOfLines={1} style={[styles.gridTitle, { color: textColor }]}>
-                    {item.name}
-                  </Text>
-
-                  <View style={styles.gridControls}>
-                    <TouchableOpacity
-                      onPress={() => changeCount(item.id, -1)}
-                      style={styles.qtyBtn}
-                    >
-                      <Text style={{ color: textColor, fontSize: 18, fontWeight: 'bold' }}>-</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSelectedItemForQty(item);
-                        setDirectQtyText(item.count.toString());
-                        setQtyModalVisible(true);
-                      }}
-                    >
-                      <Text style={[styles.qtyText, { color: textColor }]}>
-                        {item.count} {item.unit}
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={() => changeCount(item.id, 1)}
-                      style={styles.qtyBtn}
-                    >
-                      <Text style={{ color: textColor, fontSize: 18, fontWeight: 'bold' }}>+</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.cardActionsRow}>
-                    <TouchableOpacity onPress={() => shareSingleProduct(item)}>
-                      <Ionicons name="share-outline" size={16} color={textColor} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => openEditItemModal(item)}>
-                      <Ionicons name="pencil" size={16} color="#888" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => deleteItem(item.id)}>
-                      <Ionicons name="trash-outline" size={16} color="#ff4444" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              );
-            }
-
-            return (
-              <View
-                style={[
-                  styles.listCard,
-                  {
-                    backgroundColor: currentTheme.cardBg,
-                    borderColor: cardBorderColor,
-                    borderWidth: isColorStyle ? 2 : 1,
-                  },
-                  !isColorStyle && item.bought && styles.cardBought,
-                ]}
-              >
-                <TouchableOpacity
-                  onPress={() => toggleBought(item.id)}
-                  style={styles.checkArea}
-                >
-                  {!isColorStyle && (
-                    <Ionicons
-                      name={item.bought ? 'checkbox' : 'square-outline'}
-                      size={24}
-                      color={textColor}
+                <View style={[styles.card, item.checked && styles.cardChecked]}>
+                  <TouchableOpacity onPress={() => toggleCheck(item.id)} style={styles.cardLeft}>
+                    <Ionicons 
+                      name={item.checked ? "checkbox" : "square-outline"} 
+                      size={24} 
+                      color={item.checked ? "#00ff88" : "#8e8e93"} 
                     />
-                  )}
-                  <Text style={[styles.listTitle, { color: textColor }]}>{item.name}</Text>
-                </TouchableOpacity>
-
-                <View style={styles.gridControls}>
-                  <TouchableOpacity onPress={() => changeCount(item.id, -1)}>
-                    <Text style={{ color: textColor, fontSize: 18, fontWeight: 'bold' }}>-</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      setSelectedItemForQty(item);
-                      setDirectQtyText(item.count.toString());
-                      setQtyModalVisible(true);
-                    }}
-                  >
-                    <Text style={[styles.qtyText, { color: textColor }]}>
-                      {item.count} {item.unit}
+                    {libData?.image ? (
+                      <Image source={{ uri: libData.image }} style={styles.thumbImage} />
+                    ) : (
+                      <View style={styles.thumbPlaceholder}>
+                        <Ionicons name="basket-outline" size={18} color="#8e8e93" />
+                      </View>
+                    )}
+                    <Text style={[styles.cardText, item.checked && styles.cardTextChecked]}>
+                      {item.name}
                     </Text>
                   </TouchableOpacity>
+                  <TouchableOpacity onPress={() => deleteFromList(item.id)}>
+                    <Ionicons name="trash-outline" size={20} color="#ff453a" />
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>Корзина пуста. Добавьте из Библиотеки или через +</Text>
+            }
+          />
+          {shoppingList.some(i => i.checked) && (
+            <TouchableOpacity style={styles.clearButton} onPress={clearChecked}>
+              <Text style={styles.clearButtonText}>Удалить купленное</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
-                  <TouchableOpacity onPress={() => changeCount(item.id, 1)}>
-                    <Text style={{ color: textColor, fontSize: 18, fontWeight: 'bold' }}>+</Text>
-                  </TouchableOpacity>
+      {/* ЭКРАН 2: БИБЛИОТЕКА ПРОДУКТОВ */}
+      {activeTab === 'library' && (
+        <View style={{ flex: 1 }}>
+          {/* Поиск */}
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Поиск по каталогу..."
+            placeholderTextColor="#8e8e93"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
 
-                  <TouchableOpacity
-                    onPress={() => shareSingleProduct(item)}
-                    style={{ marginLeft: 6 }}
-                  >
-                    <Ionicons name="share-outline" size={18} color={textColor} />
+          {/* Фильтр по Категориям */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
+            {CATEGORIES.map(cat => (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.categoryChip, selectedCategory === cat && styles.categoryChipActive]}
+                onPress={() => setSelectedCategory(cat)}
+              >
+                <Text style={[styles.categoryChipText, selectedCategory === cat && styles.categoryChipTextActive]}>
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Список Библиотеки */}
+          <FlatList
+            data={filteredLibrary}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listPadding}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <TouchableOpacity onPress={() => updateProductImage(item.id)}>
+                  {item.image ? (
+                    <Image source={{ uri: item.image }} style={styles.thumbImage} />
+                  ) : (
+                    <View style={styles.thumbPlaceholder}>
+                      <Ionicons name="camera-outline" size={20} color="#00ff88" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <View style={styles.libInfo}>
+                  <Text style={styles.cardText}>{item.name}</Text>
+                  <Text style={styles.categorySubText}>{item.category}</Text>
+                </View>
+
+                <View style={styles.actionsRow}>
+                  <TouchableOpacity onPress={() => addFromLibraryToList(item)} style={styles.addToListBtn}>
+                    <Ionicons name="cart-outline" size={22} color="#00ff88" />
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => openEditItemModal(item)}
-                    style={{ marginLeft: 6 }}
-                  >
-                    <Ionicons name="pencil" size={18} color="#888" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => deleteItem(item.id)} style={{ marginLeft: 6 }}>
-                    <Ionicons name="trash-outline" size={18} color="#ff4444" />
+                  <TouchableOpacity onPress={() => deleteFromLibrary(item.id)} style={{ marginLeft: 12 }}>
+                    <Ionicons name="trash-outline" size={20} color="#ff453a" />
                   </TouchableOpacity>
                 </View>
               </View>
-            );
-          }}
-        />
+            )}
+          />
+        </View>
       )}
 
-      {/* Кнопка плюс */}
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: textColor }]}
-        onPress={() => {
-          if (!currentListId) {
-            setListModalVisible(true);
-          } else {
-            closeItemModal();
-            setItemModalVisible(true);
-          }
-        }}
-      >
-        <Ionicons name="add" size={32} color="#080a0d" />
-      </TouchableOpacity>
-
-      {/* Модалка создания списка */}
-      <Modal visible={listModalVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
+      {/* МОДАЛЬНОЕ ОКНО СОЗДАНИЯ */}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>{t.addList}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={t.enterListName}
-              placeholderTextColor="#666"
-              value={listNameInput}
-              onChangeText={setListNameInput}
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                onPress={() => setListModalVisible(false)}
-                style={styles.btnCancel}
-              >
-                <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleCreateList}
-                style={[styles.btnSave, { backgroundColor: textColor }]}
-              >
-                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+            <Text style={styles.modalTitle}>Новый продукт</Text>
 
-      {/* Модалка добавления товара */}
-      <Modal visible={itemModalVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>{editingItemId ? t.editItem : t.addItem}</Text>
-
-            <TouchableOpacity
-              style={[styles.catalogBtn, { borderColor: textColor }]}
-              onPress={() => {
-                setItemModalVisible(false);
-                setCatalogModalVisible(true);
-              }}
-            >
-              <Ionicons name="book-outline" size={18} color={textColor} />
-              <Text style={{ color: textColor, fontWeight: 'bold' }}>{t.selectFromCatalog}</Text>
+            <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
+              {newItemImage ? (
+                <Image source={{ uri: newItemImage }} style={styles.modalPreviewImage} />
+              ) : (
+                <View style={{ alignItems: 'center' }}>
+                  <Ionicons name="camera" size={32} color="#00ff88" />
+                  <Text style={{ color: '#8e8e93', fontSize: 12, marginTop: 4 }}>Выбрать фото</Text>
+                </View>
+              )}
             </TouchableOpacity>
 
             <TextInput
-              style={styles.input}
-              placeholder={t.enterItemName}
-              placeholderTextColor="#666"
-              value={itemName}
-              onChangeText={setItemName}
+              style={styles.modalInput}
+              placeholder="Название (например, Свинина)..."
+              placeholderTextColor="#8e8e93"
+              value={newItemName}
+              onChangeText={setNewItemName}
             />
 
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-              <TextInput
-                style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                placeholder={t.photoUrl}
-                placeholderTextColor="#666"
-                value={itemImage}
-                onChangeText={setItemImage}
-              />
-              <TouchableOpacity
-                style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
-                onPress={pickImageFromGallery}
-              >
-                <Ionicons name="image-outline" size={20} color="#080a0d" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.unitContainer}>
-              {['г', 'кг', 'шт', 'л', 'мл', 'уп'].map((u) => (
+            <Text style={{ color: '#fff', marginBottom: 8 }}>Категория:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: 40, marginBottom: 20 }}>
+              {CATEGORIES.filter(c => c !== 'Все').map(cat => (
                 <TouchableOpacity
-                  key={u}
-                  style={[
-                    styles.unitBadge,
-                    itemUnit === u && { backgroundColor: textColor },
-                  ]}
-                  onPress={() => setItemUnit(u)}
+                  key={cat}
+                  style={[styles.categoryChip, newItemCategory === cat && styles.categoryChipActive]}
+                  onPress={() => setNewItemCategory(cat)}
                 >
-                  <Text style={{ color: itemUnit === u ? '#080a0d' : '#fff', fontWeight: 'bold' }}>
-                    {u}
+                  <Text style={[styles.categoryChipText, newItemCategory === cat && styles.categoryChipTextActive]}>
+                    {cat}
                   </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={closeItemModal} style={styles.btnCancel}>
-                <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSaveItem}
-                style={[styles.btnSave, { backgroundColor: textColor }]}
-              >
-                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Модалка Каталога готовых товаров */}
-      <Modal visible={catalogModalVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
-          <View style={[styles.modalContent, { height: '80%' }]}>
-            <Text style={styles.modalHeader}>{t.catalog}</Text>
-            <ScrollView style={{ flex: 1, marginVertical: 10 }}>
-              {PRESET_PRODUCTS.map((p, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  style={styles.catalogCard}
-                  onPress={() => addPresetToCurrentList(p)}
-                >
-                  <Image source={{ uri: p.image }} style={styles.catalogImage} />
-                  <Text style={styles.catalogTitle}>{p.name}</Text>
-                  <Ionicons name="add-circle-outline" size={24} color={textColor} />
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity
-              onPress={() => setCatalogModalVisible(false)}
-              style={[styles.btnSave, { backgroundColor: textColor, alignSelf: 'center', width: '100%' }]}
-            >
-              <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
-                {t.cancel}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
-      {/* Модалка смены количества */}
-      <Modal visible={qtyModalVisible} animationType="fade" transparent>
-        <View style={styles.modalBg}>
-          <View style={[styles.modalContent, { width: '80%' }]}>
-            <Text style={styles.modalHeader}>{t.enterQty}</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={directQtyText}
-              onChangeText={setDirectQtyText}
-              autoFocus
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                onPress={() => setQtyModalVisible(false)}
-                style={styles.btnCancel}
-              >
-                <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.mBtn, styles.mBtnCancel]} onPress={() => setModalVisible(false)}>
+                <Text style={{ color: '#fff' }}>Отмена</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={saveDirectQty}
-                style={[styles.btnSave, { backgroundColor: textColor }]}
-              >
-                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+              <TouchableOpacity style={[styles.mBtn, styles.mBtnAdd]} onPress={handleAddItem}>
+                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>Добавить</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Настройки */}
-      <Modal visible={settingsVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>{t.settings}</Text>
-
-            <Text style={styles.sectionLabel}>{t.language}</Text>
-            <View style={styles.rowPicker}>
-              {['ru', 'en'].map((l) => (
-                <TouchableOpacity
-                  key={l}
-                  style={[
-                    styles.chip,
-                    lang === l && { backgroundColor: textColor },
-                  ]}
-                  onPress={() => saveSetting('@app_lang', l, setLang)}
-                >
-                  <Text style={{ color: lang === l ? '#000' : '#fff' }}>
-                    {l.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.theme}</Text>
-            <View style={styles.rowPicker}>
-              {['dark', 'gray', 'light'].map((k) => (
-                <TouchableOpacity
-                  key={k}
-                  style={[
-                    styles.chip,
-                    themeKey === k && { backgroundColor: textColor },
-                  ]}
-                  onPress={() => saveSetting('@app_theme_key', k, setThemeKey)}
-                >
-                  <Text style={{ color: themeKey === k ? '#000' : '#fff' }}>
-                    {k.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.textColor}</Text>
-            <View style={styles.rowPicker}>
-              {TEXT_COLORS.map((c) => (
-                <TouchableOpacity
-                  key={c.value}
-                  style={[
-                    styles.colorCircle,
-                    { backgroundColor: c.value },
-                    textColor === c.value && { borderWidth: 2, borderColor: '#fff' },
-                  ]}
-                  onPress={() => saveSetting('@app_text_color', c.value, setTextColor)}
-                />
-              ))}
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.viewMode}</Text>
-            <View style={styles.rowPicker}>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  viewMode === 'grid' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_view_mode', 'grid', setViewMode)}
-              >
-                <Text style={{ color: viewMode === 'grid' ? '#000' : '#fff' }}>
-                  Плитка
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  viewMode === 'list' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_view_mode', 'list', setViewMode)}
-              >
-                <Text style={{ color: viewMode === 'list' ? '#000' : '#fff' }}>
-                  Минимализм
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.switchRow}>
-              <Text style={{ color: '#fff', flex: 1, fontSize: 13 }}>{t.lockViewMode}</Text>
-              <Switch
-                value={isViewLocked}
-                onValueChange={(v) => saveSetting('@app_view_locked', v, setIsViewLocked)}
-                trackColor={{ false: '#444', true: textColor }}
-              />
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.markStyle}</Text>
-            <View style={styles.rowPicker}>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  markStyle === 'color' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_mark_style', 'color', setMarkStyle)}
-              >
-                <Text style={{ color: markStyle === 'color' ? '#000' : '#fff' }}>
-                  {t.markColor}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  markStyle === 'check' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_mark_style', 'check', setMarkStyle)}
-              >
-                <Text style={{ color: markStyle === 'check' ? '#000' : '#fff' }}>
-                  {t.markCheck}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => setSettingsVisible(false)}
-              style={[styles.btnSave, { backgroundColor: textColor, marginTop: 16 }]}
-            >
-              <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
-                ОК
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -959,132 +459,51 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  headerTitle: { fontSize: 18, fontWeight: 'bold' },
+  container: { flex: 1, backgroundColor: '#080a0d' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  headerTitle: { color: '#ffffff', fontSize: 24, fontWeight: 'bold' },
+  addButton: { backgroundColor: '#00ff88', padding: 8, borderRadius: 20 },
+  
+  tabContainer: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: '#161b22', borderRadius: 10, padding: 4 },
+  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
+  activeTab: { backgroundColor: '#21262d' },
+  tabText: { color: '#8e8e93', fontWeight: '600' },
+  activeTabText: { color: '#00ff88' },
 
-  listFolderCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 10,
-  },
-  folderTitle: { fontSize: 16, fontWeight: 'bold' },
+  listPadding: { paddingHorizontal: 16, paddingBottom: 20 },
+  card: { flexDirection: 'row', backgroundColor: '#161b22', padding: 12, borderRadius: 12, alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  cardChecked: { opacity: 0.5 },
+  cardLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  cardText: { color: '#fff', fontSize: 16, marginLeft: 12 },
+  cardTextChecked: { textDecorationLine: 'line-through', color: '#8e8e93' },
+  
+  thumbImage: { width: 40, height: 40, borderRadius: 8, marginLeft: 10 },
+  thumbPlaceholder: { width: 40, height: 40, borderRadius: 8, backgroundColor: '#21262d', justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
+  
+  libInfo: { flex: 1, marginLeft: 4 },
+  categorySubText: { color: '#8e8e93', fontSize: 12, marginLeft: 12 },
+  actionsRow: { flexDirection: 'row', alignItems: 'center' },
+  addToListBtn: { backgroundColor: '#21262d', padding: 6, borderRadius: 8 },
 
-  gridCard: {
-    margin: 6,
-    padding: 10,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  gridImageArea: { width: '100%', height: 90, borderRadius: 8, overflow: 'hidden', marginBottom: 8 },
-  gridImage: { width: '100%', height: '100%' },
-  gridImagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    borderWidth: 1,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#00000088',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  gridTitle: { fontSize: 15, fontWeight: 'bold', marginBottom: 6 },
-  gridControls: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  cardActionsRow: { flexDirection: 'row', gap: 14, marginTop: 8 },
+  searchInput: { backgroundColor: '#161b22', color: '#fff', padding: 12, marginHorizontal: 16, borderRadius: 10, marginBottom: 10 },
+  categoriesScroll: { paddingLeft: 16, marginBottom: 12, maxHeight: 36 },
+  categoryChip: { paddingHorizontal: 14, paddingVertical: 6, backgroundColor: '#161b22', borderRadius: 16, marginRight: 8, height: 32 },
+  categoryChipActive: { backgroundColor: '#00ff88' },
+  categoryChipText: { color: '#8e8e93', fontSize: 13 },
+  categoryChipTextActive: { color: '#080a0d', fontWeight: 'bold' },
 
-  listCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  checkArea: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
-  listTitle: { fontSize: 16, fontWeight: '500' },
+  clearButton: { backgroundColor: '#ff453a22', margin: 16, padding: 12, borderRadius: 10, alignItems: 'center' },
+  clearButtonText: { color: '#ff453a', fontWeight: 'bold' },
+  emptyText: { color: '#8e8e93', textAlign: 'center', marginTop: 40 },
 
-  cardBought: { opacity: 0.35 },
-  qtyBtn: { paddingHorizontal: 6 },
-  qtyText: { fontSize: 14, fontWeight: 'bold', paddingHorizontal: 4 },
-
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  modalBg: {
-    flex: 1,
-    backgroundColor: '#000000aa',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '88%',
-    backgroundColor: '#16191f',
-    borderRadius: 12,
-    padding: 20,
-    maxHeight: '85%',
-  },
-  modalHeader: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
-  input: {
-    backgroundColor: '#ffffff11',
-    color: '#fff',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-    fontSize: 15,
-  },
-  catalogBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
-  },
-  catalogCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff11',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  catalogImage: { width: 40, height: 40, borderRadius: 6, marginRight: 12 },
-  catalogTitle: { color: '#fff', flex: 1, fontSize: 15, fontWeight: '500' },
-
-  unitContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  unitBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: '#ffffff11' },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
-  btnCancel: { padding: 10 },
-  btnSave: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 6 },
-
-  sectionLabel: { color: '#888', fontSize: 13, marginTop: 10, marginBottom: 8 },
-  rowPicker: { flexDirection: 'row', gap: 10, marginBottom: 12, flexWrap: 'wrap' },
-  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 8 },
-  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, backgroundColor: '#ffffff11' },
-  colorCircle: { width: 32, height: 32, borderRadius: 16 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', padding: 20 },
+  modalContent: { backgroundColor: '#161b22', borderRadius: 16, padding: 20 },
+  modalTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' },
+  imagePickerBtn: { width: 90, height: 90, borderRadius: 12, backgroundColor: '#21262d', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16, overflow: 'hidden' },
+  modalPreviewImage: { width: '100%', height: '100%' },
+  modalInput: { backgroundColor: '#080a0d', color: '#fff', padding: 12, borderRadius: 8, marginBottom: 16 },
+  modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
+  mBtn: { flex: 1, padding: 12, borderRadius: 8, alignItems: 'center', marginHorizontal: 4 },
+  mBtnCancel: { backgroundColor: '#21262d' },
+  mBtnAdd: { backgroundColor: '#00ff88' }
 });

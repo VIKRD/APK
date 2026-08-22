@@ -2,6 +2,7 @@
   "expo": {
     "name": "GroceryApp",
     "slug": "grocery-app",
+    "owner": "asosalitys-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",

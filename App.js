@@ -545,18 +545,28 @@ export default function App() {
     }
 
     // Создание НОВОГО товара в конкретную категорию БИБЛИОТЕКИ
-    let targetCatName = targetCategoryForNewItem || 'Разное';
-    const catExists = categorizedCatalog.some((c) => c.category === targetCatName);
-    if (!catExists) {
-      targetCatName = categorizedCatalog[0]?.category || 'Разное';
-    }
+let targetCatName = targetCategoryForNewItem;
 
-    let isItemInCatalog = false;
-    categorizedCatalog.forEach((c) => {
-      if (c.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase())) {
-        isItemInCatalog = true;
-      }
-    });
+// 1. Проверяем, существует ли переданная категория (без учёта регистра)
+const existingCat = categorizedCatalog.find(
+  (c) => c.category.trim().toLowerCase() === (targetCatName || '').trim().toLowerCase()
+);
+
+if (existingCat) {
+  // Используем точное имя категории из базы
+  targetCatName = existingCat.category;
+} else {
+  // Если категория не передана или не найдена — берем текущую выбранную или fallback
+  targetCatName = targetCategoryForNewItem || 'Разное';
+}
+
+// 2. Проверяем, есть ли уже такой товар в библиотеке
+let isItemInCatalog = false;
+categorizedCatalog.forEach((c) => {
+  if (c.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase())) {
+    isItemInCatalog = true;
+  }
+});
 
     if (!isItemInCatalog) {
       const updatedCat = categorizedCatalog.map((cat) => {

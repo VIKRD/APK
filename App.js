@@ -16,13 +16,12 @@ import {
   Alert,
   ScrollView,
   TouchableWithoutFeedback,
-  BackHandler,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-// Расширенный дефолтный ассортимент по категориям
+// Обновленный дефолтный ассортимент по категориям
 const DEFAULT_CATEGORIZED_PRESETS = [
   {
     category: 'Овощи и Зелень',
@@ -31,13 +30,13 @@ const DEFAULT_CATEGORIZED_PRESETS = [
       { id: 'p_c2', name: 'Помидоры', unit: 'кг' },
       { id: 'p_c3', name: 'Лук', unit: 'кг' },
       { id: 'p_c4', name: 'Чеснок', unit: 'шт' },
-      { id: 'p_c5', name: 'Буряк (Свекла)', unit: 'кг' },
-      { id: 'p_c6', name: 'Морковка', unit: 'кг' },
-      { id: 'p_c7', name: 'Картошка', unit: 'кг' },
+      { id: 'p_c5', name: 'Свекла (Буряк)', unit: 'кг' },
+      { id: 'p_c6', name: 'Морковь', unit: 'кг' },
+      { id: 'p_c7', name: 'Картофель', unit: 'кг' },
       { id: 'p_c8', name: 'Капуста', unit: 'кг' },
       { id: 'p_c9', name: 'Авокадо', unit: 'шт' },
       { id: 'p_c10', name: 'Грибы (Шампиньоны)', unit: 'кг' },
-      { id: 'p_c11', name: 'Вешенки (Глывы)', unit: 'кг' },
+      { id: 'p_c11', name: 'Вешенки', unit: 'кг' },
       { id: 'p_c12', name: 'Петрушка', unit: 'уп' },
       { id: 'p_c13', name: 'Салат', unit: 'уп' },
       { id: 'p_c14', name: 'Укроп', unit: 'уп' },
@@ -55,7 +54,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
       { id: 'p_f7', name: 'Нектарин', unit: 'кг' },
       { id: 'p_f8', name: 'Груши', unit: 'кг' },
       { id: 'p_f9', name: 'Манго', unit: 'шт' },
-      { id: 'p_f10', name: 'Голубика (Лохина)', unit: 'кг' },
+      { id: 'p_f10', name: 'Голубика (Черника)', unit: 'кг' },
     ],
   },
   {
@@ -64,7 +63,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
       { id: 'p_b1', name: 'Вермишель', unit: 'уп' },
       { id: 'p_b2', name: 'Рис', unit: 'уп' },
       { id: 'p_b3', name: 'Гречка', unit: 'уп' },
-      { id: 'p_b4', name: 'Пшеничка', unit: 'уп' },
+      { id: 'p_b4', name: 'Пшеничная крупа', unit: 'уп' },
       { id: 'p_b5', name: 'Горох', unit: 'уп' },
       { id: 'p_b6', name: 'Фасоль', unit: 'уп' },
       { id: 'p_b7', name: 'Чечевица', unit: 'уп' },
@@ -75,7 +74,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
   {
     category: 'Выпечка и Хлеб',
     items: [
-      { id: 'p_h1', name: 'Хлеб (Украинский)', unit: 'шт' },
+      { id: 'p_h1', name: 'Хлеб Украинский', unit: 'шт' },
       { id: 'p_h2', name: 'Батон', unit: 'шт' },
       { id: 'p_h3', name: 'Багет', unit: 'шт' },
       { id: 'p_h4', name: 'Чиабатта', unit: 'шт' },
@@ -97,7 +96,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     category: 'Мясо и Колбасы',
     items: [
       { id: 'p_mk1', name: 'Колбаса докторская', unit: 'кг' },
-      { id: 'p_mk2', name: 'Колбаса сухая', unit: 'кг' },
+      { id: 'p_mk2', name: 'Колбаса сырокопчёная', unit: 'кг' },
       { id: 'p_mk3', name: 'Свинина', unit: 'кг' },
       { id: 'p_mk4', name: 'Сало', unit: 'кг' },
       { id: 'p_mk5', name: 'Курица', unit: 'кг' },
@@ -111,7 +110,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
       { id: 'p_kn3', name: 'Консервы свинина', unit: 'банка' },
       { id: 'p_kn4', name: 'Скумбрия', unit: 'банка' },
       { id: 'p_kn5', name: 'Консервы курятина', unit: 'банка' },
-      { id: 'p_kn6', name: 'Консервы яловичина', unit: 'банка' },
+      { id: 'p_kn6', name: 'Консервы говядина', unit: 'банка' },
     ],
   },
   {
@@ -120,15 +119,43 @@ const DEFAULT_CATEGORIZED_PRESETS = [
       { id: 'p_ch1', name: 'Средство для унитаза', unit: 'шт' },
       { id: 'p_ch2', name: 'Средство для ванной', unit: 'шт' },
       { id: 'p_ch3', name: 'Средство для плиты', unit: 'шт' },
-      { id: 'p_ch4', name: 'Sif', unit: 'шт' },
+      { id: 'p_ch4', name: 'Cif', unit: 'шт' },
       { id: 'p_ch5', name: 'Fairy', unit: 'шт' },
     ],
   },
   {
-    category: 'Напитки',
+    category: 'Безалкогольные напитки',
     items: [
       { id: 'p_dr1', name: 'Живчик', unit: 'л' },
       { id: 'p_dr2', name: 'Вода', unit: 'л' },
+      { id: 'p_dr3', name: 'Пепси', unit: 'л' },
+      { id: 'p_dr4', name: 'Фанта', unit: 'л' },
+      { id: 'p_dr5', name: 'Кока-Кола', unit: 'л' },
+      { id: 'p_dr6', name: 'Спрайт', unit: 'л' },
+      { id: 'p_dr7', name: 'Байкал', unit: 'л' },
+      { id: 'p_dr8', name: 'Тархун', unit: 'л' },
+      { id: 'p_dr9', name: 'Питбуль', unit: 'л' },
+      { id: 'p_dr10', name: 'Моджо', unit: 'л' },
+      { id: 'p_dr11', name: 'Моршинская', unit: 'л' },
+      { id: 'p_dr12', name: 'Оболонская', unit: 'л' },
+      { id: 'p_dr13', name: 'Квас', unit: 'л' },
+      { id: 'p_dr14', name: 'Сок томатный', unit: 'л' },
+      { id: 'p_dr15', name: 'Сок апельсиновый', unit: 'л' },
+      { id: 'p_dr16', name: 'Сок виноградно-яблочный', unit: 'л' },
+      { id: 'p_dr17', name: 'Сок мультивитамин', unit: 'л' },
+      { id: 'p_dr18', name: 'Сок персиковый', unit: 'л' },
+      { id: 'p_dr19', name: 'Сок грейпфрутовый', unit: 'л' },
+      { id: 'p_dr20', name: 'Сок сицилийский апельсин', unit: 'л' },
+    ],
+  },
+  {
+    category: 'Алкогольные напитки',
+    items: [
+      { id: 'p_al1', name: 'Пиво', unit: 'л' },
+      { id: 'p_al2', name: 'Водка', unit: 'л' },
+      { id: 'p_al3', name: 'Виски', unit: 'л' },
+      { id: 'p_al4', name: 'Джин', unit: 'л' },
+      { id: 'p_al5', name: 'Ликёр', unit: 'л' },
     ],
   },
 ];
@@ -184,7 +211,6 @@ const TRANSLATIONS = {
   },
 };
 
-// Исправлены оттенки тем (темнее фон, светлее базовый текст)
 const THEMES = {
   dark: { bg: '#0b0e14', cardBg: '#161b22', border: '#21262d', textDefault: '#e6edf3' },
   gray: { bg: '#181a1f', cardBg: '#22262e', border: '#2d3139', textDefault: '#d7dadc' },
@@ -214,11 +240,12 @@ export default function App() {
   const [categorizedCatalog, setCategorizedCatalog] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
 
-  // Состояние аккордеона библиотеки
+  // Аккордеон и поиск в библиотеке
   const [expandedCategories, setExpandedCategories] = useState({});
   const [selectedCatalogItems, setSelectedCatalogItems] = useState({});
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState('');
 
-  // Добавление товара вручную в категорию
+  // Категория для добавления вручную
   const [targetCategoryForNewItem, setTargetCategoryForNewItem] = useState(null);
 
   const [listModalVisible, setListModalVisible] = useState(false);
@@ -258,7 +285,7 @@ export default function App() {
       const savedLocked = await AsyncStorage.getItem('@app_view_locked');
       const savedMark = await AsyncStorage.getItem('@app_mark_style');
       const savedLists = await AsyncStorage.getItem('@app_grocery_lists_v2');
-      const savedCatalog = await AsyncStorage.getItem('@app_categorized_catalog_v3');
+      const savedCatalog = await AsyncStorage.getItem('@app_categorized_catalog_v4');
 
       if (savedLang) setLang(JSON.parse(savedLang));
       if (savedTheme) setThemeKey(JSON.parse(savedTheme));
@@ -270,11 +297,10 @@ export default function App() {
       let masterCat = DEFAULT_CATEGORIZED_PRESETS;
       if (savedCatalog) {
         const parsed = JSON.parse(savedCatalog);
-        // Слияние для исключения дубликатов при обновлениях
         masterCat = mergeCatalogs(DEFAULT_CATEGORIZED_PRESETS, parsed);
       }
       setCategorizedCatalog(masterCat);
-      await AsyncStorage.setItem('@app_categorized_catalog_v3', JSON.stringify(masterCat));
+      await AsyncStorage.setItem('@app_categorized_catalog_v4', JSON.stringify(masterCat));
 
       if (savedLists) {
         setLists(JSON.parse(savedLists));
@@ -321,7 +347,7 @@ export default function App() {
 
   const saveCategorizedCatalog = async (newCatalog) => {
     setCategorizedCatalog(newCatalog);
-    await AsyncStorage.setItem('@app_categorized_catalog_v3', JSON.stringify(newCatalog));
+    await AsyncStorage.setItem('@app_categorized_catalog_v4', JSON.stringify(newCatalog));
   };
 
   const saveSetting = async (key, value, setter) => {
@@ -331,7 +357,6 @@ export default function App() {
 
   const currentList = lists.find((l) => l.id === currentListId);
 
-  // Выбор картинки из галереи
   const pickImageFromGallery = async (setImageCallback) => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -350,7 +375,6 @@ export default function App() {
     }
   };
 
-  // Переключение состояния аккордеона
   const toggleCategory = (catName) => {
     setExpandedCategories((prev) => ({
       ...prev,
@@ -358,7 +382,6 @@ export default function App() {
     }));
   };
 
-  // Чекбокс выбора товара из библиотеки
   const toggleSelectCatalogItem = (item) => {
     setSelectedCatalogItems((prev) => ({
       ...prev,
@@ -366,13 +389,13 @@ export default function App() {
     }));
   };
 
-  // Подтверждение массового добавления из библиотеки в список
   const applySelectedCatalogItems = () => {
     if (!currentListId) return;
 
     const itemsToAdd = Object.values(selectedCatalogItems).filter(Boolean);
     if (itemsToAdd.length === 0) {
       setCatalogModalVisible(false);
+      setCatalogSearchQuery('');
       return;
     }
 
@@ -399,17 +422,16 @@ export default function App() {
 
     saveLists(updatedLists);
     setSelectedCatalogItems({});
+    setCatalogSearchQuery('');
     setCatalogModalVisible(false);
   };
 
-  // Добавление пользовательского товара в выбранную категорию библиотеки
   const addItemToCategory = (categoryName) => {
     setTargetCategoryForNewItem(categoryName);
     closeItemModal();
     setItemModalVisible(true);
   };
 
-  // Редактирование фото товара библиотеки
   const handleSaveCatalogImage = () => {
     if (!editingCatalogProduct) return;
 
@@ -422,7 +444,6 @@ export default function App() {
 
     saveCategorizedCatalog(updated);
 
-    // Синхронизируем картинки во всех списках
     const updatedLists = lists.map((list) => ({
       ...list,
       items: list.items.map((item) =>
@@ -477,74 +498,112 @@ export default function App() {
     ]);
   };
 
+  // Метод сохранения товара: добавляется в БИБЛИОТЕКУ и одновременно В ТЕКУЩИЙ СПИСОК
   const handleSaveItem = () => {
     if (!itemName.trim()) return;
     const trimmedName = itemName.trim();
+    const countVal = parseFloat(itemCount) || 1;
 
-    // Если добавляем товар через библиотеку в определенную категорию
-    if (targetCategoryForNewItem) {
+    let targetCatName = targetCategoryForNewItem || 'Разное';
+    const catExists = categorizedCatalog.some((c) => c.category === targetCatName);
+    if (!catExists) {
+      targetCatName = categorizedCatalog[0]?.category || 'Разное';
+    }
+
+    let isItemInCatalog = false;
+    categorizedCatalog.forEach((c) => {
+      if (c.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase())) {
+        isItemInCatalog = true;
+      }
+    });
+
+    if (!isItemInCatalog) {
       const updatedCat = categorizedCatalog.map((cat) => {
-        if (cat.category === targetCategoryForNewItem) {
-          const exists = cat.items.some(
-            (i) => i.name.toLowerCase() === trimmedName.toLowerCase()
-          );
-          if (!exists) {
-            return {
-              ...cat,
-              items: [
-                ...cat.items,
-                {
-                  id: Date.now().toString(),
-                  name: trimmedName,
-                  unit: itemUnit,
-                  image: itemImage,
-                },
-              ],
-            };
-          }
+        if (cat.category === targetCatName) {
+          return {
+            ...cat,
+            items: [
+              ...cat.items,
+              {
+                id: Date.now().toString() + Math.random().toString().substr(2, 4),
+                name: trimmedName,
+                unit: itemUnit,
+                image: itemImage,
+              },
+            ],
+          };
         }
         return cat;
       });
       saveCategorizedCatalog(updatedCat);
-      setTargetCategoryForNewItem(null);
-      closeItemModal();
-      return;
     }
 
-    if (!currentListId) return;
-
-    const updatedLists = lists.map((list) => {
-      if (list.id === currentListId) {
-        if (editingItemId) {
-          const updatedItems = list.items.map((i) =>
-            i.id === editingItemId
-              ? {
-                  ...i,
-                  name: trimmedName,
-                  count: parseFloat(itemCount) || 1,
-                  unit: itemUnit,
-                  image: itemImage,
-                }
-              : i
-          );
-          return { ...list, items: updatedItems };
-        } else {
-          const newItem = {
-            id: Date.now().toString(),
-            name: trimmedName,
-            count: parseFloat(itemCount) || 1,
-            unit: itemUnit,
-            image: itemImage,
-            bought: false,
-          };
-          return { ...list, items: [...list.items, newItem] };
+    if (currentListId) {
+      const updatedLists = lists.map((list) => {
+        if (list.id === currentListId) {
+          if (editingItemId) {
+            const updatedItems = list.items.map((i) =>
+              i.id === editingItemId
+                ? {
+                    ...i,
+                    name: trimmedName,
+                    count: countVal,
+                    unit: itemUnit,
+                    image: itemImage,
+                  }
+                : i
+            );
+            return { ...list, items: updatedItems };
+          } else {
+            const existsInList = list.items.some(
+              (i) => i.name.toLowerCase() === trimmedName.toLowerCase()
+            );
+            if (!existsInList) {
+              const newItem = {
+                id: Date.now().toString() + Math.random().toString().substr(2, 4),
+                name: trimmedName,
+                count: countVal,
+                unit: itemUnit,
+                image: itemImage,
+                bought: false,
+              };
+              return { ...list, items: [...list.items, newItem] };
+            }
+          }
         }
+        return list;
+      });
+      saveLists(updatedLists);
+    }
+
+    closeItemModal();
+  };
+
+  const createAndSelectFromSearch = (queryName) => {
+    if (!queryName.trim()) return;
+    const trimmed = queryName.trim();
+    const targetCat = categorizedCatalog[0]?.category || 'Разное';
+
+    const newPreset = {
+      id: Date.now().toString() + Math.random().toString().substr(2, 4),
+      name: trimmed,
+      unit: 'шт',
+      image: '',
+    };
+
+    const updatedCat = categorizedCatalog.map((cat, idx) => {
+      if (idx === 0) {
+        return {
+          ...cat,
+          items: [...cat.items, newPreset],
+        };
       }
-      return list;
+      return cat;
     });
 
-    saveLists(updatedLists);
-    closeItemModal();
+    saveCategorizedCatalog(updatedCat);
+    toggleSelectCatalogItem(newPreset);
+    setCatalogSearchQuery('');
   };
 
   const deleteItem = (itemId) => {
@@ -654,6 +713,23 @@ export default function App() {
       console.error(e);
     }
   };
+
+  // Живой поиск по каталогу
+  const searchResults = React.useMemo(() => {
+    if (!catalogSearchQuery.trim()) return [];
+    const query = catalogSearchQuery.toLowerCase().trim();
+    const results = [];
+
+    categorizedCatalog.forEach((cat) => {
+      cat.items.forEach((item) => {
+        if (item.name.toLowerCase().includes(query)) {
+          results.push({ ...item, categoryName: cat.category });
+        }
+      });
+    });
+
+    return results;
+  }, [catalogSearchQuery, categorizedCatalog]);
 
   const numColumns = viewMode === 'list' ? 1 : width > 900 ? 4 : isLandscape || width > 600 ? 3 : 2;
 
@@ -900,14 +976,15 @@ export default function App() {
         />
       )}
 
-      {/* Кнопка плюс -> Открывает Библиотеку по умолчанию */}
+      {/* Кнопка Плюс */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: textColor }]}
         onPress={() => {
           if (!currentListId) {
             setListModalVisible(true);
           } else {
-            setCatalogModalVisible(true);
+            closeItemModal();
+            setItemModalVisible(true);
           }
         }}
       >
@@ -953,7 +1030,7 @@ export default function App() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Модалка добавления товара вручную */}
+      {/* Модалка добавления/редактирования товара */}
       <Modal
         visible={itemModalVisible}
         animationType="slide"
@@ -1035,7 +1112,7 @@ export default function App() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Модалка Категориальной Библиотеки (Аккордеон) */}
+      {/* Модалка Библиотеки товаров С ПОИСКОМ */}
       <Modal
         visible={catalogModalVisible}
         animationType="slide"
@@ -1045,88 +1122,178 @@ export default function App() {
         <TouchableWithoutFeedback onPress={applySelectedCatalogItems}>
           <View style={styles.modalBg}>
             <TouchableWithoutFeedback>
-              <View style={[styles.modalContent, { height: '85%', backgroundColor: currentTheme.cardBg }]}>
+              <View style={[styles.modalContent, { height: '88%', backgroundColor: currentTheme.cardBg }]}>
                 <Text style={[styles.modalHeader, { color: textColor }]}>{t.catalog}</Text>
-                
+
+                {/* Поисковая строка вверху библиотеки */}
+                <View style={styles.searchBarContainer}>
+                  <Ionicons name="search-outline" size={20} color="#888" style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={[styles.searchInput, { color: currentTheme.textDefault }]}
+                    placeholder="Быстрый поиск товаров..."
+                    placeholderTextColor="#888"
+                    value={catalogSearchQuery}
+                    onChangeText={setCatalogSearchQuery}
+                  />
+                  {catalogSearchQuery.length > 0 && (
+                    <TouchableOpacity onPress={() => setCatalogSearchQuery('')}>
+                      <Ionicons name="close-circle" size={18} color="#888" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
                 <ScrollView style={{ flex: 1, marginVertical: 10 }}>
-                  {categorizedCatalog.map((catGroup) => {
-                    const isExpanded = !!expandedCategories[catGroup.category];
-                    return (
-                      <View key={catGroup.category} style={styles.categoryAccordion}>
-                        <TouchableOpacity
-                          style={[styles.categoryHeader, { borderBottomColor: currentTheme.border }]}
-                          onPress={() => toggleCategory(catGroup.category)}
-                        >
-                          <Text style={[styles.categoryTitle, { color: textColor }]}>
-                            {catGroup.category}
-                          </Text>
-                          <Ionicons
-                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                            size={20}
-                            color={textColor}
-                          />
-                        </TouchableOpacity>
-
-                        {isExpanded && (
-                          <View style={styles.categoryBody}>
-                            {catGroup.items.map((p) => {
-                              const isChecked = !!selectedCatalogItems[p.id];
-                              return (
-                                <View key={p.id} style={styles.catalogCard}>
-                                  <TouchableOpacity
-                                    style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
-                                    onPress={() => toggleSelectCatalogItem(p)}
-                                  >
-                                    <Ionicons
-                                      name={isChecked ? 'checkbox' : 'square-outline'}
-                                      size={22}
-                                      color={textColor}
-                                      style={{ marginRight: 10 }}
-                                    />
-                                    {p.image ? (
-                                      <Image source={{ uri: p.image }} style={styles.catalogThumbImage} />
-                                    ) : (
-                                      <View style={styles.catalogThumbPlaceholder}>
-                                        <Ionicons name="basket-outline" size={16} color="#888" />
-                                      </View>
-                                    )}
-                                    <Text style={[styles.catalogTitle, { color: currentTheme.textDefault }]}>
-                                      {p.name}
-                                    </Text>
-                                  </TouchableOpacity>
-
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                    <TouchableOpacity
-                                      onPress={() => {
-                                        setEditingCatalogProduct(p);
-                                        setCatalogEditImage(p.image || '');
-                                        setCatalogItemModalVisible(true);
-                                      }}
-                                    >
-                                      <Ionicons name="pencil" size={16} color="#888" />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => deleteFromMasterCatalog(p.id, p.name)}>
-                                      <Ionicons name="trash-outline" size={16} color="#ff4444" />
-                                    </TouchableOpacity>
+                  {/* Живая выдача результатов поиска */}
+                  {catalogSearchQuery.trim().length > 0 ? (
+                    <View>
+                      <Text style={{ color: textColor, fontWeight: 'bold', marginBottom: 10 }}>
+                        Результаты поиска:
+                      </Text>
+                      {searchResults.length > 0 ? (
+                        searchResults.map((p) => {
+                          const isChecked = !!selectedCatalogItems[p.id];
+                          return (
+                            <View key={p.id} style={styles.catalogCard}>
+                              <TouchableOpacity
+                                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                                onPress={() => toggleSelectCatalogItem(p)}
+                              >
+                                <Ionicons
+                                  name={isChecked ? 'checkbox' : 'square-outline'}
+                                  size={22}
+                                  color={textColor}
+                                  style={{ marginRight: 10 }}
+                                />
+                                {p.image ? (
+                                  <Image source={{ uri: p.image }} style={styles.catalogThumbImage} />
+                                ) : (
+                                  <View style={styles.catalogThumbPlaceholder}>
+                                    <Ionicons name="basket-outline" size={16} color="#888" />
                                   </View>
+                                )}
+                                <View style={{ flex: 1 }}>
+                                  <Text style={[styles.catalogTitle, { color: currentTheme.textDefault }]}>
+                                    {p.name}
+                                  </Text>
+                                  <Text style={{ fontSize: 11, color: '#888' }}>{p.categoryName}</Text>
                                 </View>
-                              );
-                            })}
+                              </TouchableOpacity>
 
-                            <TouchableOpacity
-                              style={[styles.addCategoryItemBtn, { borderColor: textColor }]}
-                              onPress={() => addItemToCategory(catGroup.category)}
-                            >
-                              <Ionicons name="add-circle-outline" size={18} color={textColor} />
-                              <Text style={{ color: textColor, fontWeight: 'bold' }}>
-                                Добавить товар в категорию
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                      </View>
-                    );
-                  })}
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setEditingCatalogProduct(p);
+                                    setCatalogEditImage(p.image || '');
+                                    setCatalogItemModalVisible(true);
+                                  }}
+                                >
+                                  <Ionicons name="pencil" size={16} color="#888" />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => deleteFromMasterCatalog(p.id, p.name)}>
+                                  <Ionicons name="trash-outline" size={16} color="#ff4444" />
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          );
+                        })
+                      ) : (
+                        <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                          <Text style={{ color: currentTheme.textDefault, marginBottom: 12 }}>
+                            Товар не найден в библиотеке
+                          </Text>
+                          <TouchableOpacity
+                            style={[styles.addCategoryItemBtn, { borderColor: textColor, width: '100%' }]}
+                            onPress={() => createAndSelectFromSearch(catalogSearchQuery)}
+                          >
+                            <Ionicons name="add-circle-outline" size={20} color={textColor} />
+                            <Text style={{ color: textColor, fontWeight: 'bold' }}>
+                              Добавить "{catalogSearchQuery.trim()}" в библиотеку
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  ) : (
+                    /* Обычный режим просмотра библиотеки категорий */
+                    categorizedCatalog.map((catGroup) => {
+                      const isExpanded = !!expandedCategories[catGroup.category];
+                      return (
+                        <View key={catGroup.category} style={styles.categoryAccordion}>
+                          <TouchableOpacity
+                            style={[styles.categoryHeader, { borderBottomColor: currentTheme.border }]}
+                            onPress={() => toggleCategory(catGroup.category)}
+                          >
+                            <Text style={[styles.categoryTitle, { color: textColor }]}>
+                              {catGroup.category}
+                            </Text>
+                            <Ionicons
+                              name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                              size={20}
+                              color={textColor}
+                            />
+                          </TouchableOpacity>
+
+                          {isExpanded && (
+                            <View style={styles.categoryBody}>
+                              {catGroup.items.map((p) => {
+                                const isChecked = !!selectedCatalogItems[p.id];
+                                return (
+                                  <View key={p.id} style={styles.catalogCard}>
+                                    <TouchableOpacity
+                                      style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                                      onPress={() => toggleSelectCatalogItem(p)}
+                                    >
+                                      <Ionicons
+                                        name={isChecked ? 'checkbox' : 'square-outline'}
+                                        size={22}
+                                        color={textColor}
+                                        style={{ marginRight: 10 }}
+                                      />
+                                      {p.image ? (
+                                        <Image source={{ uri: p.image }} style={styles.catalogThumbImage} />
+                                      ) : (
+                                        <View style={styles.catalogThumbPlaceholder}>
+                                          <Ionicons name="basket-outline" size={16} color="#888" />
+                                        </View>
+                                      )}
+                                      <Text style={[styles.catalogTitle, { color: currentTheme.textDefault }]}>
+                                        {p.name}
+                                      </Text>
+                                    </TouchableOpacity>
+
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                      <TouchableOpacity
+                                        onPress={() => {
+                                          setEditingCatalogProduct(p);
+                                          setCatalogEditImage(p.image || '');
+                                          setCatalogItemModalVisible(true);
+                                        }}
+                                      >
+                                        <Ionicons name="pencil" size={16} color="#888" />
+                                      </TouchableOpacity>
+                                      <TouchableOpacity onPress={() => deleteFromMasterCatalog(p.id, p.name)}>
+                                        <Ionicons name="trash-outline" size={16} color="#ff4444" />
+                                      </TouchableOpacity>
+                                    </View>
+                                  </View>
+                                );
+                              })}
+
+                              <TouchableOpacity
+                                style={[styles.addCategoryItemBtn, { borderColor: textColor }]}
+                                onPress={() => addItemToCategory(catGroup.category)}
+                              >
+                                <Ionicons name="add-circle-outline" size={18} color={textColor} />
+                                <Text style={{ color: textColor, fontWeight: 'bold' }}>
+                                  Добавить товар в категорию
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })
+                  )}
                 </ScrollView>
 
                 <TouchableOpacity
@@ -1143,7 +1310,7 @@ export default function App() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Модалка изменения фото товара в Библиотеке */}
+      {/* Модалка смены фото товара в Библиотеке */}
       <Modal
         visible={catalogItemModalVisible}
         animationType="fade"
@@ -1195,7 +1362,7 @@ export default function App() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Модалка смены количества */}
+      {/* Модалка изменения количества */}
       <Modal
         visible={qtyModalVisible}
         animationType="fade"
@@ -1234,7 +1401,7 @@ export default function App() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Настройки (Выход по внешнему клику и свайпу назад без сохранения изменений) */}
+      {/* Настройки */}
       <Modal
         visible={settingsVisible}
         animationType="slide"
@@ -1464,14 +1631,28 @@ const styles = StyleSheet.create({
     width: '88%',
     borderRadius: 12,
     padding: 20,
-    maxHeight: '85%',
+    maxHeight: '88%',
   },
-  modalHeader: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
+  modalHeader: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
+    fontSize: 15,
+  },
+
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 10,
     fontSize: 15,
   },
 
@@ -1511,7 +1692,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  catalogTitle: { flex: 1, fontSize: 14, fontWeight: '500' },
+  catalogTitle: { fontSize: 14, fontWeight: '500' },
   addCategoryItemBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1519,7 +1700,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderRadius: 8,
-    padding: 8,
+    padding: 10,
     marginTop: 6,
     borderStyle: 'dashed',
   },

@@ -536,7 +536,7 @@ export default function App() {
 
   // ФУНКЦИЯ ГЕНЕРАЦИИ СЛЕДУЮЩЕГО ID ДЛЯ ТОВАРА В КАТЕГОРИИ
   const generateNextItemId = (catId, items) => {
-    const prefix = catId;
+    const prefix = catId || 'p_gen';
     let maxNum = 0;
     items.forEach((item) => {
       if (item.id && item.id.startsWith(prefix)) {
@@ -549,107 +549,109 @@ export default function App() {
     return `${prefix}${maxNum + 1}`;
   };
 
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ/ДОБАВЛЕНИЯ ТОВАРА БЕЗ ФОЛЛБЭКОВ НА «РАЗНОЕ»
+  // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ/ДОБАВЛЕНИЯ ТОВАРА
   const handleSaveItem = () => {
-    if (!itemName.trim()) return;
-    const trimmedName = itemName.trim();
-    const countVal = parseFloat(itemCount) || 1;
+    try {
+      if (!itemName.trim()) return;
+      const trimmedName = itemName.trim();
+      const countVal = parseFloat(itemCount) || 1;
 
-    // 1. Редактирование существующего товара в текущем активном списке
-    if (editingItemId && currentListId) {
-      const updatedLists = lists.map((list) => {
-        if (list.id === currentListId) {
-          const updatedItems = list.items.map((i) =>
-            i.id === editingItemId
-              ? { ...i, name: trimmedName, count: countVal, unit: itemUnit, image: itemImage }
-              : i
-          );
-          return { ...list, items: updatedItems };
-        }
-        return list;
-      });
-      saveLists(updatedLists);
-      closeItemModal();
-      return;
-    }
+      // 1. Редактирование существующего товара в текущем активном списке
+      if (editingItemId && currentListId) {
+        const updatedLists = lists.map((list) => {
+          if (list.id === currentListId) {
+            const updatedItems = list.items.map((i) =>
+              i.id === editingItemId
+                ? { ...i, name: trimmedName, count: countVal, unit: itemUnit, image: itemImage }
+                : i
+            );
+            return { ...list, items: updatedItems };
+          }
+          return list;
+        });
+        saveLists(updatedLists);
+        closeItemModal();
+        return;
+      }
 
-    // 2. Добавление товара строго в выбранную категорию
-    let newProductId = '';
+      // 2. Добавление товара строго в выбранную категорию библиотеки
+      let newProductId = '';
 
-    if (targetCategoryForNewItem) {
-      const updatedCat = categorizedCatalog.map((cat) => {
-        // Ищем строго совпадение по имени категории
-        if (cat.category.trim().toLowerCase() === targetCategoryForNewItem.trim().toLowerCase()) {
-          const exists = cat.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
-          
-          if (!exists) {
-            // Префикс берем СТРОГО из id текущей категории
-            const catPrefix = cat.id; 
-            newProductId = generateNextItemId(catPrefix, cat.items);
+      if (targetCategoryForNewItem) {
+        let categoryFound = false;
+
+        const updatedCat = categorizedCatalog.map((cat) => {
+          if (cat.category.trim().toLowerCase() === targetCategoryForNewItem.trim().toLowerCase()) {
+            categoryFound = true;
+            const exists = cat.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
             
-            const newCatalogProduct = {
-              id: newProductId,
-              name: trimmedName,
-              unit: itemUnit,
-              image: itemImage,
-            };
-            
-            return {
-              ...cat,
-              items: [...cat.items, newCatalogProduct],
-            };
-          } else {
-            const existingItem = cat.items.find((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
-            if (existingItem) {
-              newProductId = existingItem.id;
+            if (!exists) {
+              const catPrefix = cat.id || 'p_gen'; 
+              newProductId = generateNextItemId(catPrefix, cat.items);
+              
+              const newCatalogProduct = {
+                id: newProductId,
+                name: trimmedName,
+                unit: itemUnit,
+                image: itemImage,
+              };
+              
+              return {
+                ...cat,
+                items: [...cat.items, newCatalogProduct],
+              };
+            } else {
+              const existingItem = cat.items.find((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
+              if (existingItem) {
+                newProductId = existingItem.id;
+              }
             }
           }
+          return cat;
+        });
+
+        if (!categoryFound) {
+          Alert.alert('Ошибка', `Категория "${targetCategoryForNewItem}" не найдена в библиотеке.`);
+          return;
         }
-        return cat;
-      });
 
-      saveCategorizedCatalog(updatedCat);
+        saveCategorizedCatalog(updatedCat);
 
-      // Раскрываем категорию в UI
-      setExpandedCategories((prev) => ({
-        ...prev,
-        [targetCategoryForNewItem]: true,
-      }));
-    }
+        // Раскрываем категорию в UI
+        setExpandedCategories((prev) => ({
+          ...prev,
+          [targetCategoryForNewItem]: true,
+        }));
+      }
 
-    // 3. Добавление в текущий список покупок
-    if (currentListId) {
-      const newItemForList = {
-        id: newProductId || Date.now().toString() + Math.random().toString().substr(2, 4),
-        name: trimmedName,
-        unit: itemUnit,
-        image: itemImage,
-        count: countVal,
-        bought: false,
-      };
+      // 3. Добавление в текущий список покупок
+      if (currentListId) {
+        const newItemForList = {
+          id: newProductId || Date.now().toString() + Math.random().toString().substr(2, 4),
+          name: trimmedName,
+          unit: itemUnit,
+          image: itemImage,
+          count: countVal,
+          bought: false,
+        };
 
-      const updatedLists = lists.map((list) => {
-        if (list.id === currentListId) {
-          const exists = list.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
-          if (!exists) {
-            return { ...list, items: [...list.items, newItemForList] };
+        const updatedLists = lists.map((list) => {
+          if (list.id === currentListId) {
+            const exists = list.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
+            if (!exists) {
+              return { ...list, items: [...list.items, newItemForList] };
+            }
           }
-        }
-        return list;
-      });
-      saveLists(updatedLists);
+          return list;
+        });
+        saveLists(updatedLists);
+      }
+
+      closeItemModal();
+    } catch (error) {
+      console.error('Ошибка при сохранении товара:', error);
+      Alert.alert('Ошибка', 'Не удалось сохранить товар. Попробуйте снова.');
     }
-
-    closeItemModal();
-  };
-
-    // Автоматическое раскрытие категории в UI
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [targetCatName]: true,
-    }));
-
-    closeItemModal();
   };
 
   const createAndSelectFromSearch = (queryName) => {

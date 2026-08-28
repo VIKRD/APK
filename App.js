@@ -549,7 +549,7 @@ export default function App() {
     return `${prefix}${maxNum + 1}`;
   };
 
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ/ДОБАВЛЕНИЯ ТОВАРА С АВТОПРИСВОЕНИЕМ ID
+  // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ/ДОБАВЛЕНИЯ ТОВАРА БЕЗ ФОЛЛБЭКОВ НА «РАЗНОЕ»
   const handleSaveItem = () => {
     if (!itemName.trim()) return;
     const trimmedName = itemName.trim();
@@ -573,72 +573,51 @@ export default function App() {
       return;
     }
 
-    // 2. Создание абсолютно нового товара
-    let targetCatName = targetCategoryForNewItem || 'Разное';
+    // 2. Добавление товара строго в выбранную категорию
     let newProductId = '';
 
-    let catFound = false;
-
-    // Добавление в библиотеку по категориям (Master Catalog)
-    let updatedCat = categorizedCatalog.map((cat) => {
-      if (cat.category.trim().toLowerCase() === targetCatName.trim().toLowerCase()) {
-        catFound = true;
-        targetCatName = cat.category;
-        const exists = cat.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
-        if (!exists) {
-          const catPrefix = cat.id || 'p_o';
-          newProductId = generateNextItemId(catPrefix, cat.items);
-          const newCatalogProduct = {
-            id: newProductId,
-            name: trimmedName,
-            unit: itemUnit,
-            image: itemImage,
-          };
-          return {
-            ...cat,
-            items: [...cat.items, newCatalogProduct],
-          };
-        } else {
-          const existingItem = cat.items.find((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
-          if (existingItem) {
-            newProductId = existingItem.id;
+    if (targetCategoryForNewItem) {
+      const updatedCat = categorizedCatalog.map((cat) => {
+        // Ищем строго совпадение по имени категории
+        if (cat.category.trim().toLowerCase() === targetCategoryForNewItem.trim().toLowerCase()) {
+          const exists = cat.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
+          
+          if (!exists) {
+            // Префикс берем СТРОГО из id текущей категории
+            const catPrefix = cat.id; 
+            newProductId = generateNextItemId(catPrefix, cat.items);
+            
+            const newCatalogProduct = {
+              id: newProductId,
+              name: trimmedName,
+              unit: itemUnit,
+              image: itemImage,
+            };
+            
+            return {
+              ...cat,
+              items: [...cat.items, newCatalogProduct],
+            };
+          } else {
+            const existingItem = cat.items.find((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
+            if (existingItem) {
+              newProductId = existingItem.id;
+            }
           }
         }
-      }
-      return cat;
-    });
+        return cat;
+      });
 
-    if (!catFound) {
-      const catPrefix = 'p_o';
-      let otherCat = updatedCat.find((c) => c.category === 'Разное');
-      const itemsInOther = otherCat ? otherCat.items : [];
-      newProductId = generateNextItemId(catPrefix, itemsInOther);
+      saveCategorizedCatalog(updatedCat);
 
-      const newCatalogProduct = {
-        id: newProductId,
-        name: trimmedName,
-        unit: itemUnit,
-        image: itemImage,
-      };
-
-      if (otherCat) {
-        updatedCat = updatedCat.map((cat) =>
-          cat.category === 'Разное'
-            ? { ...cat, items: [...cat.items, newCatalogProduct] }
-            : cat
-        );
-      } else {
-        updatedCat.push({
-          id: 'p_o',
-          category: 'Разное',
-          items: [newCatalogProduct],
-        });
-      }
+      // Раскрываем категорию в UI
+      setExpandedCategories((prev) => ({
+        ...prev,
+        [targetCategoryForNewItem]: true,
+      }));
     }
 
-    saveCategorizedCatalog(updatedCat);
-
-    // Добавление напрямую в текущий активный список покупок
+    // 3. Добавление в текущий список покупок
     if (currentListId) {
       const newItemForList = {
         id: newProductId || Date.now().toString() + Math.random().toString().substr(2, 4),
@@ -660,6 +639,9 @@ export default function App() {
       });
       saveLists(updatedLists);
     }
+
+    closeItemModal();
+  };
 
     // Автоматическое раскрытие категории в UI
     setExpandedCategories((prev) => ({

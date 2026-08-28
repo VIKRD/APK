@@ -463,8 +463,8 @@ export default function App() {
   };
 
   const addItemToCategory = (categoryName) => {
-    setTargetCategoryForNewItem(categoryName);
     closeItemModal();
+    setTargetCategoryForNewItem(categoryName);
     setItemModalVisible(true);
   };
 

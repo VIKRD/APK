@@ -15,27 +15,122 @@ import {
   Switch,
   Alert,
   ScrollView,
+  TouchableWithoutFeedback,
+  BackHandler,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-// Базовый украинский ассортимент по умолчанию
-const INITIAL_PRESETS = [
-  { id: 'p1', name: 'Свинина', unit: 'кг', image: 'https://images.unsplash.com/photo-1602470520998-f4a52199a3d6?w=200' },
-  { id: 'p2', name: 'Сало', unit: 'кг', image: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=200' },
-  { id: 'p3', name: 'Консервы', unit: 'банка', image: 'https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=200' },
-  { id: 'p4', name: 'Голубика (Лохина)', unit: 'кг', image: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=200' },
-  { id: 'p5', name: 'Живчик', unit: 'л', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200' },
-  { id: 'p6', name: 'Спагетти', unit: 'уп', image: 'https://images.unsplash.com/photo-1551462147-37885acc36f1?w=200' },
-  { id: 'p7', name: 'Молоко', unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200' },
-  { id: 'p8', name: 'Хлеб', unit: 'шт', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200' },
-  { id: 'p9', name: 'Яйца', unit: 'шт', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200' },
-  { id: 'p10', name: 'Сыр', unit: 'г', image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=200' },
-  { id: 'p11', name: 'Картофель', unit: 'кг', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200' },
-  { id: 'p12', name: 'Кофе', unit: 'уп', image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200' },
-  { id: 'p13', name: 'Вода', unit: 'л', image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=200' },
-  { id: 'p14', name: 'Курица', unit: 'кг', image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=200' },
+// Расширенный дефолтный ассортимент по категориям
+const DEFAULT_CATEGORIZED_PRESETS = [
+  {
+    category: 'Овощи и Зелень',
+    items: [
+      { id: 'p_c1', name: 'Огурцы', unit: 'кг' },
+      { id: 'p_c2', name: 'Помидоры', unit: 'кг' },
+      { id: 'p_c3', name: 'Лук', unit: 'кг' },
+      { id: 'p_c4', name: 'Чеснок', unit: 'шт' },
+      { id: 'p_c5', name: 'Буряк (Свекла)', unit: 'кг' },
+      { id: 'p_c6', name: 'Морковка', unit: 'кг' },
+      { id: 'p_c7', name: 'Картошка', unit: 'кг' },
+      { id: 'p_c8', name: 'Капуста', unit: 'кг' },
+      { id: 'p_c9', name: 'Авокадо', unit: 'шт' },
+      { id: 'p_c10', name: 'Грибы (Шампиньоны)', unit: 'кг' },
+      { id: 'p_c11', name: 'Вешенки (Глывы)', unit: 'кг' },
+      { id: 'p_c12', name: 'Петрушка', unit: 'уп' },
+      { id: 'p_c13', name: 'Салат', unit: 'уп' },
+      { id: 'p_c14', name: 'Укроп', unit: 'уп' },
+    ],
+  },
+  {
+    category: 'Фрукты и Ягоды',
+    items: [
+      { id: 'p_f1', name: 'Бананы', unit: 'кг' },
+      { id: 'p_f2', name: 'Яблоки', unit: 'кг' },
+      { id: 'p_f3', name: 'Клубника', unit: 'кг' },
+      { id: 'p_f4', name: 'Виноград', unit: 'кг' },
+      { id: 'p_f5', name: 'Персики', unit: 'кг' },
+      { id: 'p_f6', name: 'Абрикосы', unit: 'кг' },
+      { id: 'p_f7', name: 'Нектарин', unit: 'кг' },
+      { id: 'p_f8', name: 'Груши', unit: 'кг' },
+      { id: 'p_f9', name: 'Манго', unit: 'шт' },
+      { id: 'p_f10', name: 'Голубика (Лохина)', unit: 'кг' },
+    ],
+  },
+  {
+    category: 'Бакалея и Крупы',
+    items: [
+      { id: 'p_b1', name: 'Вермишель', unit: 'уп' },
+      { id: 'p_b2', name: 'Рис', unit: 'уп' },
+      { id: 'p_b3', name: 'Гречка', unit: 'уп' },
+      { id: 'p_b4', name: 'Пшеничка', unit: 'уп' },
+      { id: 'p_b5', name: 'Горох', unit: 'уп' },
+      { id: 'p_b6', name: 'Фасоль', unit: 'уп' },
+      { id: 'p_b7', name: 'Чечевица', unit: 'уп' },
+      { id: 'p_b8', name: 'Спагетти', unit: 'уп' },
+      { id: 'p_b9', name: 'Кофе', unit: 'уп' },
+    ],
+  },
+  {
+    category: 'Выпечка и Хлеб',
+    items: [
+      { id: 'p_h1', name: 'Хлеб (Украинский)', unit: 'шт' },
+      { id: 'p_h2', name: 'Батон', unit: 'шт' },
+      { id: 'p_h3', name: 'Багет', unit: 'шт' },
+      { id: 'p_h4', name: 'Чиабатта', unit: 'шт' },
+      { id: 'p_h5', name: 'Хлеб чёрный', unit: 'шт' },
+    ],
+  },
+  {
+    category: 'Молочные продукты',
+    items: [
+      { id: 'p_m1', name: 'Кефир', unit: 'л' },
+      { id: 'p_m2', name: 'Йогурт', unit: 'шт' },
+      { id: 'p_m3', name: 'Творог', unit: 'г' },
+      { id: 'p_m4', name: 'Закваска', unit: 'л' },
+      { id: 'p_m5', name: 'Молоко', unit: 'л' },
+      { id: 'p_m6', name: 'Сыр', unit: 'г' },
+    ],
+  },
+  {
+    category: 'Мясо и Колбасы',
+    items: [
+      { id: 'p_mk1', name: 'Колбаса докторская', unit: 'кг' },
+      { id: 'p_mk2', name: 'Колбаса сухая', unit: 'кг' },
+      { id: 'p_mk3', name: 'Свинина', unit: 'кг' },
+      { id: 'p_mk4', name: 'Сало', unit: 'кг' },
+      { id: 'p_mk5', name: 'Курица', unit: 'кг' },
+    ],
+  },
+  {
+    category: 'Консервы',
+    items: [
+      { id: 'p_kn1', name: 'Килька', unit: 'банка' },
+      { id: 'p_kn2', name: 'Бычки', unit: 'банка' },
+      { id: 'p_kn3', name: 'Консервы свинина', unit: 'банка' },
+      { id: 'p_kn4', name: 'Скумбрия', unit: 'банка' },
+      { id: 'p_kn5', name: 'Консервы курятина', unit: 'банка' },
+      { id: 'p_kn6', name: 'Консервы яловичина', unit: 'банка' },
+    ],
+  },
+  {
+    category: 'Бытовая химия',
+    items: [
+      { id: 'p_ch1', name: 'Средство для унитаза', unit: 'шт' },
+      { id: 'p_ch2', name: 'Средство для ванной', unit: 'шт' },
+      { id: 'p_ch3', name: 'Средство для плиты', unit: 'шт' },
+      { id: 'p_ch4', name: 'Sif', unit: 'шт' },
+      { id: 'p_ch5', name: 'Fairy', unit: 'шт' },
+    ],
+  },
+  {
+    category: 'Напитки',
+    items: [
+      { id: 'p_dr1', name: 'Живчик', unit: 'л' },
+      { id: 'p_dr2', name: 'Вода', unit: 'л' },
+    ],
+  },
 ];
 
 const TRANSLATIONS = {
@@ -49,7 +144,6 @@ const TRANSLATIONS = {
     enterItemName: 'Название товара',
     enterQty: 'Количество',
     photoUrl: 'URL-ссылка на фото',
-    pickGallery: 'Выбрать из галереи',
     save: 'Сохранить',
     cancel: 'Отмена',
     settings: 'Настройки',
@@ -61,13 +155,8 @@ const TRANSLATIONS = {
     markStyle: 'Стиль отмеченных товаров',
     markColor: 'Цвет (Красный/Зелёный)',
     markCheck: 'Галочка',
-    catalog: 'Мастер-Библиотека',
-    selectFromCatalog: 'Выбрать из каталога',
+    catalog: 'Библиотека товаров',
     defaultListName: 'Мой первый список',
-    defaultItems: [
-      { id: '1', name: 'Молоко', count: 1, unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200', bought: false },
-      { id: '2', name: 'Картофель', count: 2, unit: 'кг', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200', bought: false },
-    ],
   },
   en: {
     title: 'MY LISTS',
@@ -79,7 +168,6 @@ const TRANSLATIONS = {
     enterItemName: 'Item name',
     enterQty: 'Quantity',
     photoUrl: 'Photo URL',
-    pickGallery: 'Pick from gallery',
     save: 'Save',
     cancel: 'Cancel',
     settings: 'Settings',
@@ -91,29 +179,24 @@ const TRANSLATIONS = {
     markStyle: 'Marked items style',
     markColor: 'Color (Red/Green)',
     markCheck: 'Checkmark',
-    catalog: 'Master Catalog',
-    selectFromCatalog: 'Pick from catalog',
+    catalog: 'Product Library',
     defaultListName: 'My First List',
-    defaultItems: [
-      { id: '1', name: 'Milk', count: 1, unit: 'l', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200', bought: false },
-      { id: '2', name: 'Potato', count: 2, unit: 'kg', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200', bought: false },
-    ],
   },
 };
 
+// Исправлены оттенки тем (темнее фон, светлее базовый текст)
 const THEMES = {
-  dark: { bg: '#080a0d', cardBg: '#ffffff0a', border: '#ffffff15' },
-  gray: { bg: '#1e222b', cardBg: '#ffffff10', border: '#ffffff22' },
-  light: { bg: '#f4f5f7', cardBg: '#ffffff', border: '#00000010' },
+  dark: { bg: '#0b0e14', cardBg: '#161b22', border: '#21262d', textDefault: '#e6edf3' },
+  gray: { bg: '#181a1f', cardBg: '#22262e', border: '#2d3139', textDefault: '#d7dadc' },
+  light: { bg: '#f0f2f5', cardBg: '#ffffff', border: '#d0d7de', textDefault: '#1f2328' },
 };
 
 const TEXT_COLORS = [
-  { label: 'Белый', value: '#ffffff' },
+  { label: 'Светло-серый', value: '#e6edf3' },
   { label: 'Голубой', value: '#00f0ff' },
-  { label: 'Синий', value: '#007AFF' },
+  { label: 'Синий', value: '#3b82f6' },
   { label: 'Жёлтый', value: '#ffd700' },
-  { label: 'Серый', value: '#a0a5b5' },
-  { label: 'Чёрный', value: '#000000' },
+  { label: 'Мятный', value: '#2ecc71' },
 ];
 
 export default function App() {
@@ -128,8 +211,15 @@ export default function App() {
   const [markStyle, setMarkStyle] = useState('color');
 
   const [lists, setLists] = useState([]);
-  const [masterCatalog, setMasterCatalog] = useState([]);
+  const [categorizedCatalog, setCategorizedCatalog] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
+
+  // Состояние аккордеона библиотеки
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [selectedCatalogItems, setSelectedCatalogItems] = useState({});
+
+  // Добавление товара вручную в категорию
+  const [targetCategoryForNewItem, setTargetCategoryForNewItem] = useState(null);
 
   const [listModalVisible, setListModalVisible] = useState(false);
   const [listNameInput, setListNameInput] = useState('');
@@ -168,7 +258,7 @@ export default function App() {
       const savedLocked = await AsyncStorage.getItem('@app_view_locked');
       const savedMark = await AsyncStorage.getItem('@app_mark_style');
       const savedLists = await AsyncStorage.getItem('@app_grocery_lists_v2');
-      const savedCatalog = await AsyncStorage.getItem('@app_master_catalog');
+      const savedCatalog = await AsyncStorage.getItem('@app_categorized_catalog_v3');
 
       if (savedLang) setLang(JSON.parse(savedLang));
       if (savedTheme) setThemeKey(JSON.parse(savedTheme));
@@ -177,12 +267,14 @@ export default function App() {
       if (savedLocked !== null) setIsViewLocked(JSON.parse(savedLocked));
       if (savedMark) setMarkStyle(JSON.parse(savedMark));
 
+      let masterCat = DEFAULT_CATEGORIZED_PRESETS;
       if (savedCatalog) {
-        setMasterCatalog(JSON.parse(savedCatalog));
-      } else {
-        setMasterCatalog(INITIAL_PRESETS);
-        await AsyncStorage.setItem('@app_master_catalog', JSON.stringify(INITIAL_PRESETS));
+        const parsed = JSON.parse(savedCatalog);
+        // Слияние для исключения дубликатов при обновлениях
+        masterCat = mergeCatalogs(DEFAULT_CATEGORIZED_PRESETS, parsed);
       }
+      setCategorizedCatalog(masterCat);
+      await AsyncStorage.setItem('@app_categorized_catalog_v3', JSON.stringify(masterCat));
 
       if (savedLists) {
         setLists(JSON.parse(savedLists));
@@ -191,7 +283,7 @@ export default function App() {
           {
             id: '1',
             name: TRANSLATIONS[savedLang ? JSON.parse(savedLang) : 'ru'].defaultListName,
-            items: TRANSLATIONS[savedLang ? JSON.parse(savedLang) : 'ru'].defaultItems,
+            items: [],
           },
         ];
         setLists(initialLists);
@@ -202,14 +294,34 @@ export default function App() {
     }
   };
 
+  const mergeCatalogs = (defaults, saved) => {
+    const result = [...saved];
+    defaults.forEach((defCat) => {
+      const catIndex = result.findIndex((c) => c.category === defCat.category);
+      if (catIndex === -1) {
+        result.push(defCat);
+      } else {
+        defCat.items.forEach((defItem) => {
+          const exists = result[catIndex].items.some(
+            (i) => i.name.toLowerCase() === defItem.name.toLowerCase()
+          );
+          if (!exists) {
+            result[catIndex].items.push(defItem);
+          }
+        });
+      }
+    });
+    return result;
+  };
+
   const saveLists = async (newLists) => {
     setLists(newLists);
     await AsyncStorage.setItem('@app_grocery_lists_v2', JSON.stringify(newLists));
   };
 
-  const saveMasterCatalog = async (newCatalog) => {
-    setMasterCatalog(newCatalog);
-    await AsyncStorage.setItem('@app_master_catalog', JSON.stringify(newCatalog));
+  const saveCategorizedCatalog = async (newCatalog) => {
+    setCategorizedCatalog(newCatalog);
+    await AsyncStorage.setItem('@app_categorized_catalog_v3', JSON.stringify(newCatalog));
   };
 
   const saveSetting = async (key, value, setter) => {
@@ -238,46 +350,79 @@ export default function App() {
     }
   };
 
-  // Выбор из Каталога с добавлением в список
-  const addPresetToCurrentList = (preset) => {
+  // Переключение состояния аккордеона
+  const toggleCategory = (catName) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [catName]: !prev[catName],
+    }));
+  };
+
+  // Чекбокс выбора товара из библиотеки
+  const toggleSelectCatalogItem = (item) => {
+    setSelectedCatalogItems((prev) => ({
+      ...prev,
+      [item.id]: prev[item.id] ? null : item,
+    }));
+  };
+
+  // Подтверждение массового добавления из библиотеки в список
+  const applySelectedCatalogItems = () => {
     if (!currentListId) return;
 
-    // Защита от дублей в списке покупок
-    if (currentList.items.some((i) => i.name.toLowerCase() === preset.name.toLowerCase())) {
-      Alert.alert('Предупреждение', `Товар "${preset.name}" уже добавлен в ваш список!`);
+    const itemsToAdd = Object.values(selectedCatalogItems).filter(Boolean);
+    if (itemsToAdd.length === 0) {
+      setCatalogModalVisible(false);
       return;
     }
 
-    const newItem = {
-      id: Date.now().toString(),
-      name: preset.name,
-      count: 1,
-      unit: preset.unit,
-      image: preset.image,
-      bought: false,
-    };
-
-    const updatedLists = lists.map((l) => {
-      if (l.id === currentListId) {
-        return { ...l, items: [...l.items, newItem] };
+    const currentItems = currentList ? [...currentList.items] : [];
+    itemsToAdd.forEach((preset) => {
+      const exists = currentItems.some(
+        (i) => i.name.toLowerCase() === preset.name.toLowerCase()
+      );
+      if (!exists) {
+        currentItems.push({
+          id: Date.now().toString() + Math.random().toString().substr(2, 4),
+          name: preset.name,
+          count: 1,
+          unit: preset.unit || 'шт',
+          image: preset.image || '',
+          bought: false,
+        });
       }
-      return l;
     });
 
+    const updatedLists = lists.map((l) =>
+      l.id === currentListId ? { ...l, items: currentItems } : l
+    );
+
     saveLists(updatedLists);
+    setSelectedCatalogItems({});
     setCatalogModalVisible(false);
   };
 
-  // Редактирование / Изменение фото в Каталоге с обновлением во всех списках
+  // Добавление пользовательского товара в выбранную категорию библиотеки
+  const addItemToCategory = (categoryName) => {
+    setTargetCategoryForNewItem(categoryName);
+    closeItemModal();
+    setItemModalVisible(true);
+  };
+
+  // Редактирование фото товара библиотеки
   const handleSaveCatalogImage = () => {
     if (!editingCatalogProduct) return;
 
-    const updatedCatalog = masterCatalog.map((p) =>
-      p.id === editingCatalogProduct.id ? { ...p, image: catalogEditImage } : p
-    );
-    saveMasterCatalog(updatedCatalog);
+    const updated = categorizedCatalog.map((cat) => ({
+      ...cat,
+      items: cat.items.map((p) =>
+        p.id === editingCatalogProduct.id ? { ...p, image: catalogEditImage } : p
+      ),
+    }));
 
-    // Автоматическое обновление картинок везде в списках покупок
+    saveCategorizedCatalog(updated);
+
+    // Синхронизируем картинки во всех списках
     const updatedLists = lists.map((list) => ({
       ...list,
       items: list.items.map((item) =>
@@ -292,16 +437,18 @@ export default function App() {
     setEditingCatalogProduct(null);
   };
 
-  // Удаление позиции из библиотеки Каталога
   const deleteFromMasterCatalog = (id, name) => {
-    Alert.alert('Удалить из библиотеки?', `Товар "${name}" будет полностью удален из общего каталога.`, [
+    Alert.alert('Удалить из библиотеки?', `Товар "${name}" будет полностью удален.`, [
       { text: 'Отмена', style: 'cancel' },
       {
         text: 'Удалить',
         style: 'destructive',
         onPress: () => {
-          const updatedCatalog = masterCatalog.filter((p) => p.id !== id);
-          saveMasterCatalog(updatedCatalog);
+          const updated = categorizedCatalog.map((cat) => ({
+            ...cat,
+            items: cat.items.filter((p) => p.id !== id),
+          }));
+          saveCategorizedCatalog(updated);
         },
       },
     ]);
@@ -331,28 +478,40 @@ export default function App() {
   };
 
   const handleSaveItem = () => {
-    if (!itemName.trim() || !currentListId) return;
+    if (!itemName.trim()) return;
     const trimmedName = itemName.trim();
 
-    // Защита от дублей в рамках одного списка
-    if (
-      !editingItemId &&
-      currentList.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase())
-    ) {
-      Alert.alert('Предупреждение', `Товар "${trimmedName}" уже существует в вашем списке. Для другого сорта напишите, например, "${trimmedName} Белая"`);
+    // Если добавляем товар через библиотеку в определенную категорию
+    if (targetCategoryForNewItem) {
+      const updatedCat = categorizedCatalog.map((cat) => {
+        if (cat.category === targetCategoryForNewItem) {
+          const exists = cat.items.some(
+            (i) => i.name.toLowerCase() === trimmedName.toLowerCase()
+          );
+          if (!exists) {
+            return {
+              ...cat,
+              items: [
+                ...cat.items,
+                {
+                  id: Date.now().toString(),
+                  name: trimmedName,
+                  unit: itemUnit,
+                  image: itemImage,
+                },
+              ],
+            };
+          }
+        }
+        return cat;
+      });
+      saveCategorizedCatalog(updatedCat);
+      setTargetCategoryForNewItem(null);
+      closeItemModal();
       return;
     }
 
-    // Если создается новый товар, сохраняем его также и в Мастер-Библиотеку (если его там еще нет)
-    if (!masterCatalog.some((p) => p.name.toLowerCase() === trimmedName.toLowerCase())) {
-      const newCatalogItem = {
-        id: Date.now().toString(),
-        name: trimmedName,
-        unit: itemUnit,
-        image: itemImage,
-      };
-      saveMasterCatalog([...masterCatalog, newCatalogItem]);
-    }
+    if (!currentListId) return;
 
     const updatedLists = lists.map((list) => {
       if (list.id === currentListId) {
@@ -443,6 +602,7 @@ export default function App() {
     setItemCount('1');
     setItemUnit('шт');
     setItemImage('');
+    setTargetCategoryForNewItem(null);
   };
 
   const saveDirectQty = () => {
@@ -561,7 +721,7 @@ export default function App() {
                 <Ionicons name="folder-open-outline" size={28} color={textColor} />
                 <View>
                   <Text style={[styles.folderTitle, { color: textColor }]}>{item.name}</Text>
-                  <Text style={{ color: '#888', fontSize: 13 }}>
+                  <Text style={{ color: currentTheme.textDefault, opacity: 0.6, fontSize: 13 }}>
                     Товаров: {item.items.length}
                   </Text>
                 </View>
@@ -573,7 +733,7 @@ export default function App() {
           )}
         />
       ) : (
-        /* Товары */
+        /* Товары в списке */
         <FlatList
           key={`${viewMode}-${numColumns}`}
           data={currentList.items}
@@ -607,9 +767,9 @@ export default function App() {
                     style={styles.gridImageArea}
                   >
                     {item.image ? (
-                      <Image source={{ uri: item.image }} style={styles.gridImage} />
+                      <Image source={{ uri: item.image }} style={styles.gridImage} resizeMode="cover" />
                     ) : (
-                      <View style={[styles.gridImagePlaceholder, { borderColor: textColor }]}>
+                      <View style={[styles.gridImagePlaceholder, { borderColor: currentTheme.border }]}>
                         <Ionicons name="basket-outline" size={30} color={textColor} />
                       </View>
                     )}
@@ -691,7 +851,10 @@ export default function App() {
                       color={textColor}
                     />
                   )}
-                  <Text style={[styles.listTitle, { color: textColor }]}>{item.name}</Text>
+                  {item.image ? (
+                    <Image source={{ uri: item.image }} style={styles.listThumbImage} />
+                  ) : null}
+                  <Text style={[styles.listTitle, { color: currentTheme.textDefault }]}>{item.name}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.gridControls}>
@@ -737,15 +900,14 @@ export default function App() {
         />
       )}
 
-      {/* Кнопка плюс */}
+      {/* Кнопка плюс -> Открывает Библиотеку по умолчанию */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: textColor }]}
         onPress={() => {
           if (!currentListId) {
             setListModalVisible(true);
           } else {
-            closeItemModal();
-            setItemModalVisible(true);
+            setCatalogModalVisible(true);
           }
         }}
       >
@@ -753,363 +915,464 @@ export default function App() {
       </TouchableOpacity>
 
       {/* Модалка создания списка */}
-      <Modal visible={listModalVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>{t.addList}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder={t.enterListName}
-              placeholderTextColor="#666"
-              value={listNameInput}
-              onChangeText={setListNameInput}
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                onPress={() => setListModalVisible(false)}
-                style={styles.btnCancel}
-              >
-                <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleCreateList}
-                style={[styles.btnSave, { backgroundColor: textColor }]}
-              >
-                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
+      <Modal
+        visible={listModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setListModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setListModalVisible(false)}>
+          <View style={styles.modalBg}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { backgroundColor: currentTheme.cardBg }]}>
+                <Text style={[styles.modalHeader, { color: textColor }]}>{t.addList}</Text>
+                <TextInput
+                  style={[styles.input, { color: currentTheme.textDefault }]}
+                  placeholder={t.enterListName}
+                  placeholderTextColor="#888"
+                  value={listNameInput}
+                  onChangeText={setListNameInput}
+                />
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    onPress={() => setListModalVisible(false)}
+                    style={styles.btnCancel}
+                  >
+                    <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleCreateList}
+                    style={[styles.btnSave, { backgroundColor: textColor }]}
+                  >
+                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Модалка добавления товара */}
-      <Modal visible={itemModalVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>{editingItemId ? t.editItem : t.addItem}</Text>
+      {/* Модалка добавления товара вручную */}
+      <Modal
+        visible={itemModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={closeItemModal}
+      >
+        <TouchableWithoutFeedback onPress={closeItemModal}>
+          <View style={styles.modalBg}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { backgroundColor: currentTheme.cardBg }]}>
+                <Text style={[styles.modalHeader, { color: textColor }]}>
+                  {editingItemId
+                    ? t.editItem
+                    : targetCategoryForNewItem
+                    ? `Добавить в "${targetCategoryForNewItem}"`
+                    : t.addItem}
+                </Text>
 
-            <TouchableOpacity
-              style={[styles.catalogBtn, { borderColor: textColor }]}
-              onPress={() => {
-                setItemModalVisible(false);
-                setCatalogModalVisible(true);
-              }}
-            >
-              <Ionicons name="book-outline" size={18} color={textColor} />
-              <Text style={{ color: textColor, fontWeight: 'bold' }}>{t.selectFromCatalog}</Text>
-            </TouchableOpacity>
+                <TextInput
+                  style={[styles.input, { color: currentTheme.textDefault }]}
+                  placeholder={t.enterItemName}
+                  placeholderTextColor="#888"
+                  value={itemName}
+                  onChangeText={setItemName}
+                />
 
-            <TextInput
-              style={styles.input}
-              placeholder={t.enterItemName}
-              placeholderTextColor="#666"
-              value={itemName}
-              onChangeText={setItemName}
-            />
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                  <TextInput
+                    style={[styles.input, { flex: 1, marginBottom: 0, color: currentTheme.textDefault }]}
+                    placeholder={t.photoUrl}
+                    placeholderTextColor="#888"
+                    value={itemImage}
+                    onChangeText={setItemImage}
+                  />
+                  <TouchableOpacity
+                    style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
+                    onPress={() => pickImageFromGallery(setItemImage)}
+                  >
+                    <Ionicons name="image-outline" size={20} color="#080a0d" />
+                  </TouchableOpacity>
+                </View>
 
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-              <TextInput
-                style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                placeholder={t.photoUrl}
-                placeholderTextColor="#666"
-                value={itemImage}
-                onChangeText={setItemImage}
-              />
-              <TouchableOpacity
-                style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
-                onPress={() => pickImageFromGallery(setItemImage)}
-              >
-                <Ionicons name="image-outline" size={20} color="#080a0d" />
-              </TouchableOpacity>
-            </View>
+                <View style={styles.unitContainer}>
+                  {['г', 'кг', 'шт', 'л', 'мл', 'уп', 'банка'].map((u) => (
+                    <TouchableOpacity
+                      key={u}
+                      style={[
+                        styles.unitBadge,
+                        itemUnit === u && { backgroundColor: textColor },
+                      ]}
+                      onPress={() => setItemUnit(u)}
+                    >
+                      <Text
+                        style={{
+                          color: itemUnit === u ? '#080a0d' : currentTheme.textDefault,
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {u}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
 
-            <View style={styles.unitContainer}>
-              {['г', 'кг', 'шт', 'л', 'мл', 'уп'].map((u) => (
+                <View style={styles.modalActions}>
+                  <TouchableOpacity onPress={closeItemModal} style={styles.btnCancel}>
+                    <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleSaveItem}
+                    style={[styles.btnSave, { backgroundColor: textColor }]}
+                  >
+                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Модалка Категориальной Библиотеки (Аккордеон) */}
+      <Modal
+        visible={catalogModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={applySelectedCatalogItems}
+      >
+        <TouchableWithoutFeedback onPress={applySelectedCatalogItems}>
+          <View style={styles.modalBg}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { height: '85%', backgroundColor: currentTheme.cardBg }]}>
+                <Text style={[styles.modalHeader, { color: textColor }]}>{t.catalog}</Text>
+                
+                <ScrollView style={{ flex: 1, marginVertical: 10 }}>
+                  {categorizedCatalog.map((catGroup) => {
+                    const isExpanded = !!expandedCategories[catGroup.category];
+                    return (
+                      <View key={catGroup.category} style={styles.categoryAccordion}>
+                        <TouchableOpacity
+                          style={[styles.categoryHeader, { borderBottomColor: currentTheme.border }]}
+                          onPress={() => toggleCategory(catGroup.category)}
+                        >
+                          <Text style={[styles.categoryTitle, { color: textColor }]}>
+                            {catGroup.category}
+                          </Text>
+                          <Ionicons
+                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                            size={20}
+                            color={textColor}
+                          />
+                        </TouchableOpacity>
+
+                        {isExpanded && (
+                          <View style={styles.categoryBody}>
+                            {catGroup.items.map((p) => {
+                              const isChecked = !!selectedCatalogItems[p.id];
+                              return (
+                                <View key={p.id} style={styles.catalogCard}>
+                                  <TouchableOpacity
+                                    style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                                    onPress={() => toggleSelectCatalogItem(p)}
+                                  >
+                                    <Ionicons
+                                      name={isChecked ? 'checkbox' : 'square-outline'}
+                                      size={22}
+                                      color={textColor}
+                                      style={{ marginRight: 10 }}
+                                    />
+                                    {p.image ? (
+                                      <Image source={{ uri: p.image }} style={styles.catalogThumbImage} />
+                                    ) : (
+                                      <View style={styles.catalogThumbPlaceholder}>
+                                        <Ionicons name="basket-outline" size={16} color="#888" />
+                                      </View>
+                                    )}
+                                    <Text style={[styles.catalogTitle, { color: currentTheme.textDefault }]}>
+                                      {p.name}
+                                    </Text>
+                                  </TouchableOpacity>
+
+                                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                    <TouchableOpacity
+                                      onPress={() => {
+                                        setEditingCatalogProduct(p);
+                                        setCatalogEditImage(p.image || '');
+                                        setCatalogItemModalVisible(true);
+                                      }}
+                                    >
+                                      <Ionicons name="pencil" size={16} color="#888" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => deleteFromMasterCatalog(p.id, p.name)}>
+                                      <Ionicons name="trash-outline" size={16} color="#ff4444" />
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+                              );
+                            })}
+
+                            <TouchableOpacity
+                              style={[styles.addCategoryItemBtn, { borderColor: textColor }]}
+                              onPress={() => addItemToCategory(catGroup.category)}
+                            >
+                              <Ionicons name="add-circle-outline" size={18} color={textColor} />
+                              <Text style={{ color: textColor, fontWeight: 'bold' }}>
+                                Добавить товар в категорию
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+
                 <TouchableOpacity
-                  key={u}
-                  style={[
-                    styles.unitBadge,
-                    itemUnit === u && { backgroundColor: textColor },
-                  ]}
-                  onPress={() => setItemUnit(u)}
+                  onPress={applySelectedCatalogItems}
+                  style={[styles.btnSave, { backgroundColor: textColor, alignSelf: 'center', width: '100%' }]}
                 >
-                  <Text style={{ color: itemUnit === u ? '#080a0d' : '#fff', fontWeight: 'bold' }}>
-                    {u}
+                  <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
+                    ОК
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity onPress={closeItemModal} style={styles.btnCancel}>
-                <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSaveItem}
-                style={[styles.btnSave, { backgroundColor: textColor }]}
-              >
-                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Модалка Мастер-Библиотеки (Каталога) */}
-      <Modal visible={catalogModalVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
-          <View style={[styles.modalContent, { height: '80%' }]}>
-            <Text style={styles.modalHeader}>{t.catalog}</Text>
-            <ScrollView style={{ flex: 1, marginVertical: 10 }}>
-              {masterCatalog.map((p) => (
-                <View key={p.id} style={styles.catalogCard}>
+      {/* Модалка изменения фото товара в Библиотеке */}
+      <Modal
+        visible={catalogItemModalVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setCatalogItemModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setCatalogItemModalVisible(false)}>
+          <View style={styles.modalBg}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { width: '85%', backgroundColor: currentTheme.cardBg }]}>
+                <Text style={[styles.modalHeader, { color: textColor }]}>Изменить фото товара</Text>
+                <Text style={{ color: currentTheme.textDefault, marginBottom: 12 }}>
+                  {editingCatalogProduct?.name}
+                </Text>
+
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+                  <TextInput
+                    style={[styles.input, { flex: 1, marginBottom: 0, color: currentTheme.textDefault }]}
+                    placeholder={t.photoUrl}
+                    placeholderTextColor="#888"
+                    value={catalogEditImage}
+                    onChangeText={setCatalogEditImage}
+                  />
                   <TouchableOpacity
-                    style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
-                    onPress={() => addPresetToCurrentList(p)}
+                    style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
+                    onPress={() => pickImageFromGallery(setCatalogEditImage)}
                   >
-                    {p.image ? (
-                      <Image source={{ uri: p.image }} style={styles.catalogImage} />
-                    ) : (
-                      <View style={[styles.catalogImage, styles.gridImagePlaceholder]}>
-                        <Ionicons name="basket-outline" size={18} color="#888" />
-                      </View>
-                    )}
-                    <Text style={styles.catalogTitle}>{p.name}</Text>
+                    <Ionicons name="image-outline" size={20} color="#080a0d" />
                   </TouchableOpacity>
-
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setEditingCatalogProduct(p);
-                        setCatalogEditImage(p.image || '');
-                        setCatalogItemModalVisible(true);
-                      }}
-                    >
-                      <Ionicons name="pencil" size={18} color="#888" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => deleteFromMasterCatalog(p.id, p.name)}>
-                      <Ionicons name="trash-outline" size={18} color="#ff4444" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => addPresetToCurrentList(p)}>
-                      <Ionicons name="add-circle-outline" size={24} color={textColor} />
-                    </TouchableOpacity>
-                  </View>
                 </View>
-              ))}
-            </ScrollView>
-            <TouchableOpacity
-              onPress={() => setCatalogModalVisible(false)}
-              style={[styles.btnSave, { backgroundColor: textColor, alignSelf: 'center', width: '100%' }]}
-            >
-              <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
-                {t.cancel}
-              </Text>
-            </TouchableOpacity>
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    onPress={() => setCatalogItemModalVisible(false)}
+                    style={styles.btnCancel}
+                  >
+                    <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleSaveCatalogImage}
+                    style={[styles.btnSave, { backgroundColor: textColor }]}
+                  >
+                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
-      </Modal>
-
-      {/* Модалка изменения фото товара в Мастер-Библиотеке */}
-      <Modal visible={catalogItemModalVisible} animationType="fade" transparent>
-        <View style={styles.modalBg}>
-          <View style={[styles.modalContent, { width: '85%' }]}>
-            <Text style={styles.modalHeader}>Изменить фото товара</Text>
-            <Text style={{ color: '#fff', marginBottom: 12 }}>
-              {editingCatalogProduct?.name}
-            </Text>
-
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-              <TextInput
-                style={[styles.input, { flex: 1, marginBottom: 0 }]}
-                placeholder={t.photoUrl}
-                placeholderTextColor="#666"
-                value={catalogEditImage}
-                onChangeText={setCatalogEditImage}
-              />
-              <TouchableOpacity
-                style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
-                onPress={() => pickImageFromGallery(setCatalogEditImage)}
-              >
-                <Ionicons name="image-outline" size={20} color="#080a0d" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                onPress={() => setCatalogItemModalVisible(false)}
-                style={styles.btnCancel}
-              >
-                <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSaveCatalogImage}
-                style={[styles.btnSave, { backgroundColor: textColor }]}
-              >
-                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       {/* Модалка смены количества */}
-      <Modal visible={qtyModalVisible} animationType="fade" transparent>
-        <View style={styles.modalBg}>
-          <View style={[styles.modalContent, { width: '80%' }]}>
-            <Text style={styles.modalHeader}>{t.enterQty}</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              value={directQtyText}
-              onChangeText={setDirectQtyText}
-              autoFocus
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                onPress={() => setQtyModalVisible(false)}
-                style={styles.btnCancel}
-              >
-                <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={saveDirectQty}
-                style={[styles.btnSave, { backgroundColor: textColor }]}
-              >
-                <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
-              </TouchableOpacity>
-            </View>
+      <Modal
+        visible={qtyModalVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setQtyModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setQtyModalVisible(false)}>
+          <View style={styles.modalBg}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { width: '80%', backgroundColor: currentTheme.cardBg }]}>
+                <Text style={[styles.modalHeader, { color: textColor }]}>{t.enterQty}</Text>
+                <TextInput
+                  style={[styles.input, { color: currentTheme.textDefault }]}
+                  keyboardType="numeric"
+                  value={directQtyText}
+                  onChangeText={setDirectQtyText}
+                  autoFocus
+                />
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    onPress={() => setQtyModalVisible(false)}
+                    style={styles.btnCancel}
+                  >
+                    <Text style={{ color: '#ff4444' }}>{t.cancel}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={saveDirectQty}
+                    style={[styles.btnSave, { backgroundColor: textColor }]}
+                  >
+                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Настройки */}
-      <Modal visible={settingsVisible} animationType="slide" transparent>
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>{t.settings}</Text>
+      {/* Настройки (Выход по внешнему клику и свайпу назад без сохранения изменений) */}
+      <Modal
+        visible={settingsVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setSettingsVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setSettingsVisible(false)}>
+          <View style={styles.modalBg}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContent, { backgroundColor: currentTheme.cardBg }]}>
+                <Text style={[styles.modalHeader, { color: textColor }]}>{t.settings}</Text>
 
-            <Text style={styles.sectionLabel}>{t.language}</Text>
-            <View style={styles.rowPicker}>
-              {['ru', 'en'].map((l) => (
+                <Text style={styles.sectionLabel}>{t.language}</Text>
+                <View style={styles.rowPicker}>
+                  {['ru', 'en'].map((l) => (
+                    <TouchableOpacity
+                      key={l}
+                      style={[
+                        styles.chip,
+                        lang === l && { backgroundColor: textColor },
+                      ]}
+                      onPress={() => saveSetting('@app_lang', l, setLang)}
+                    >
+                      <Text style={{ color: lang === l ? '#000' : currentTheme.textDefault }}>
+                        {l.toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.sectionLabel}>{t.theme}</Text>
+                <View style={styles.rowPicker}>
+                  {['dark', 'gray', 'light'].map((k) => (
+                    <TouchableOpacity
+                      key={k}
+                      style={[
+                        styles.chip,
+                        themeKey === k && { backgroundColor: textColor },
+                      ]}
+                      onPress={() => saveSetting('@app_theme_key', k, setThemeKey)}
+                    >
+                      <Text style={{ color: themeKey === k ? '#000' : currentTheme.textDefault }}>
+                        {k.toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.sectionLabel}>{t.textColor}</Text>
+                <View style={styles.rowPicker}>
+                  {TEXT_COLORS.map((c) => (
+                    <TouchableOpacity
+                      key={c.value}
+                      style={[
+                        styles.colorCircle,
+                        { backgroundColor: c.value },
+                        textColor === c.value && { borderWidth: 2, borderColor: '#fff' },
+                      ]}
+                      onPress={() => saveSetting('@app_text_color', c.value, setTextColor)}
+                    />
+                  ))}
+                </View>
+
+                <Text style={styles.sectionLabel}>{t.viewMode}</Text>
+                <View style={styles.rowPicker}>
+                  <TouchableOpacity
+                    style={[
+                      styles.chip,
+                      viewMode === 'grid' && { backgroundColor: textColor },
+                    ]}
+                    onPress={() => saveSetting('@app_view_mode', 'grid', setViewMode)}
+                  >
+                    <Text style={{ color: viewMode === 'grid' ? '#000' : currentTheme.textDefault }}>
+                      Плитка
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.chip,
+                      viewMode === 'list' && { backgroundColor: textColor },
+                    ]}
+                    onPress={() => saveSetting('@app_view_mode', 'list', setViewMode)}
+                  >
+                    <Text style={{ color: viewMode === 'list' ? '#000' : currentTheme.textDefault }}>
+                      Минимализм
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.switchRow}>
+                  <Text style={{ color: currentTheme.textDefault, flex: 1, fontSize: 13 }}>
+                    {t.lockViewMode}
+                  </Text>
+                  <Switch
+                    value={isViewLocked}
+                    onValueChange={(v) => saveSetting('@app_view_locked', v, setIsViewLocked)}
+                    trackColor={{ false: '#444', true: textColor }}
+                  />
+                </View>
+
+                <Text style={styles.sectionLabel}>{t.markStyle}</Text>
+                <View style={styles.rowPicker}>
+                  <TouchableOpacity
+                    style={[
+                      styles.chip,
+                      markStyle === 'color' && { backgroundColor: textColor },
+                    ]}
+                    onPress={() => saveSetting('@app_mark_style', 'color', setMarkStyle)}
+                  >
+                    <Text style={{ color: markStyle === 'color' ? '#000' : currentTheme.textDefault }}>
+                      {t.markColor}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.chip,
+                      markStyle === 'check' && { backgroundColor: textColor },
+                    ]}
+                    onPress={() => saveSetting('@app_mark_style', 'check', setMarkStyle)}
+                  >
+                    <Text style={{ color: markStyle === 'check' ? '#000' : currentTheme.textDefault }}>
+                      {t.markCheck}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
                 <TouchableOpacity
-                  key={l}
-                  style={[
-                    styles.chip,
-                    lang === l && { backgroundColor: textColor },
-                  ]}
-                  onPress={() => saveSetting('@app_lang', l, setLang)}
+                  onPress={() => setSettingsVisible(false)}
+                  style={[styles.btnSave, { backgroundColor: textColor, marginTop: 16 }]}
                 >
-                  <Text style={{ color: lang === l ? '#000' : '#fff' }}>
-                    {l.toUpperCase()}
+                  <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
+                    ОК
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.theme}</Text>
-            <View style={styles.rowPicker}>
-              {['dark', 'gray', 'light'].map((k) => (
-                <TouchableOpacity
-                  key={k}
-                  style={[
-                    styles.chip,
-                    themeKey === k && { backgroundColor: textColor },
-                  ]}
-                  onPress={() => saveSetting('@app_theme_key', k, setThemeKey)}
-                >
-                  <Text style={{ color: themeKey === k ? '#000' : '#fff' }}>
-                    {k.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.textColor}</Text>
-            <View style={styles.rowPicker}>
-              {TEXT_COLORS.map((c) => (
-                <TouchableOpacity
-                  key={c.value}
-                  style={[
-                    styles.colorCircle,
-                    { backgroundColor: c.value },
-                    textColor === c.value && { borderWidth: 2, borderColor: '#fff' },
-                  ]}
-                  onPress={() => saveSetting('@app_text_color', c.value, setTextColor)}
-                />
-              ))}
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.viewMode}</Text>
-            <View style={styles.rowPicker}>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  viewMode === 'grid' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_view_mode', 'grid', setViewMode)}
-              >
-                <Text style={{ color: viewMode === 'grid' ? '#000' : '#fff' }}>
-                  Плитка
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  viewMode === 'list' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_view_mode', 'list', setViewMode)}
-              >
-                <Text style={{ color: viewMode === 'list' ? '#000' : '#fff' }}>
-                  Минимализм
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.switchRow}>
-              <Text style={{ color: '#fff', flex: 1, fontSize: 13 }}>{t.lockViewMode}</Text>
-              <Switch
-                value={isViewLocked}
-                onValueChange={(v) => saveSetting('@app_view_locked', v, setIsViewLocked)}
-                trackColor={{ false: '#444', true: textColor }}
-              />
-            </View>
-
-            <Text style={styles.sectionLabel}>{t.markStyle}</Text>
-            <View style={styles.rowPicker}>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  markStyle === 'color' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_mark_style', 'color', setMarkStyle)}
-              >
-                <Text style={{ color: markStyle === 'color' ? '#000' : '#fff' }}>
-                  {t.markColor}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.chip,
-                  markStyle === 'check' && { backgroundColor: textColor },
-                ]}
-                onPress={() => saveSetting('@app_mark_style', 'check', setMarkStyle)}
-              >
-                <Text style={{ color: markStyle === 'check' ? '#000' : '#fff' }}>
-                  {t.markCheck}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => setSettingsVisible(false)}
-              style={[styles.btnSave, { backgroundColor: textColor, marginTop: 16 }]}
-            >
-              <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
-                ОК
-              </Text>
-            </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
   );
@@ -1174,6 +1437,7 @@ const styles = StyleSheet.create({
   },
   checkArea: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   listTitle: { fontSize: 16, fontWeight: '500' },
+  listThumbImage: { width: 32, height: 32, borderRadius: 6 },
 
   cardBought: { opacity: 0.35 },
   qtyBtn: { paddingHorizontal: 6 },
@@ -1192,50 +1456,76 @@ const styles = StyleSheet.create({
   },
   modalBg: {
     flex: 1,
-    backgroundColor: '#000000aa',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     width: '88%',
-    backgroundColor: '#16191f',
     borderRadius: 12,
     padding: 20,
     maxHeight: '85%',
   },
-  modalHeader: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
+  modalHeader: { fontSize: 18, fontWeight: 'bold', marginBottom: 16 },
   input: {
-    backgroundColor: '#ffffff11',
-    color: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
     fontSize: 15,
   },
-  catalogBtn: {
+
+  categoryAccordion: {
+    marginBottom: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    overflow: 'hidden',
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+  },
+  categoryTitle: { fontSize: 16, fontWeight: 'bold' },
+  categoryBody: { padding: 8 },
+
+  catalogCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  catalogThumbImage: { width: 32, height: 32, borderRadius: 6, marginRight: 10 },
+  catalogThumbPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#444',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  catalogTitle: { flex: 1, fontSize: 14, fontWeight: '500' },
+  addCategoryItemBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     borderWidth: 1,
     borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
+    padding: 8,
+    marginTop: 6,
+    borderStyle: 'dashed',
   },
-  catalogCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#ffffff11',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  catalogImage: { width: 40, height: 40, borderRadius: 6, marginRight: 12 },
-  catalogTitle: { color: '#fff', flex: 1, fontSize: 15, fontWeight: '500' },
 
-  unitContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  unitBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: '#ffffff11' },
+  unitContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 6 },
+  unitBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: 'rgba(255, 255, 255, 0.08)' },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
   btnCancel: { padding: 10 },
   btnSave: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 6 },
@@ -1243,6 +1533,6 @@ const styles = StyleSheet.create({
   sectionLabel: { color: '#888', fontSize: 13, marginTop: 10, marginBottom: 8 },
   rowPicker: { flexDirection: 'row', gap: 10, marginBottom: 12, flexWrap: 'wrap' },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 8 },
-  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, backgroundColor: '#ffffff11' },
+  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, backgroundColor: 'rgba(255, 255, 255, 0.08)' },
   colorCircle: { width: 32, height: 32, borderRadius: 16 },
 });

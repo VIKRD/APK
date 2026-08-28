@@ -21,141 +21,141 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-// Обновленный дефолтный ассортимент по категориям
+// Дефолтный ассортимент с картинками Unsplash для каждого товара
 const DEFAULT_CATEGORIZED_PRESETS = [
   {
     category: 'Овощи и Зелень',
     items: [
-      { id: 'p_c1', name: 'Огурцы', unit: 'кг' },
-      { id: 'p_c2', name: 'Помидоры', unit: 'кг' },
-      { id: 'p_c3', name: 'Лук', unit: 'кг' },
-      { id: 'p_c4', name: 'Чеснок', unit: 'шт' },
-      { id: 'p_c5', name: 'Свекла (Буряк)', unit: 'кг' },
-      { id: 'p_c6', name: 'Морковь', unit: 'кг' },
-      { id: 'p_c7', name: 'Картофель', unit: 'кг' },
-      { id: 'p_c8', name: 'Капуста', unit: 'кг' },
-      { id: 'p_c9', name: 'Авокадо', unit: 'шт' },
-      { id: 'p_c10', name: 'Грибы (Шампиньоны)', unit: 'кг' },
-      { id: 'p_c11', name: 'Вешенки', unit: 'кг' },
-      { id: 'p_c12', name: 'Петрушка', unit: 'уп' },
-      { id: 'p_c13', name: 'Салат', unit: 'уп' },
-      { id: 'p_c14', name: 'Укроп', unit: 'уп' },
+      { id: 'p_c1', name: 'Огурцы', unit: 'кг', image: 'https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=200' },
+      { id: 'p_c2', name: 'Помидоры', unit: 'кг', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=200' },
+      { id: 'p_c3', name: 'Лук', unit: 'кг', image: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=200' },
+      { id: 'p_c4', name: 'Чеснок', unit: 'шт', image: 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=200' },
+      { id: 'p_c5', name: 'Свекла (Буряк)', unit: 'кг', image: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?w=200' },
+      { id: 'p_c6', name: 'Морковь', unit: 'кг', image: 'https://images.unsplash.com/photo-1598170845058-12ef4a457c3b?w=200' },
+      { id: 'p_c7', name: 'Картофель', unit: 'кг', image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200' },
+      { id: 'p_c8', name: 'Капуста', unit: 'кг', image: 'https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=200' },
+      { id: 'p_c9', name: 'Авокадо', unit: 'шт', image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=200' },
+      { id: 'p_c10', name: 'Грибы (Шампиньоны)', unit: 'кг', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200' },
+      { id: 'p_c11', name: 'Вешенки', unit: 'кг', image: 'https://images.unsplash.com/photo-1567306301408-9b74779a11af?w=200' },
+      { id: 'p_c12', name: 'Петрушка', unit: 'уп', image: 'https://images.unsplash.com/photo-1628773822503-930a8586f34b?w=200' },
+      { id: 'p_c13', name: 'Салат', unit: 'уп', image: 'https://images.unsplash.com/photo-1515778767554-42d4b373f2b3?w=200' },
+      { id: 'p_c14', name: 'Укроп', unit: 'уп', image: 'https://images.unsplash.com/photo-1598642732050-7058d7124976?w=200' },
     ],
   },
   {
     category: 'Фрукты и Ягоды',
     items: [
-      { id: 'p_f1', name: 'Бананы', unit: 'кг' },
-      { id: 'p_f2', name: 'Яблоки', unit: 'кг' },
-      { id: 'p_f3', name: 'Клубника', unit: 'кг' },
-      { id: 'p_f4', name: 'Виноград', unit: 'кг' },
-      { id: 'p_f5', name: 'Персики', unit: 'кг' },
-      { id: 'p_f6', name: 'Абрикосы', unit: 'кг' },
-      { id: 'p_f7', name: 'Нектарин', unit: 'кг' },
-      { id: 'p_f8', name: 'Груши', unit: 'кг' },
-      { id: 'p_f9', name: 'Манго', unit: 'шт' },
-      { id: 'p_f10', name: 'Голубика (Черника)', unit: 'кг' },
+      { id: 'p_f1', name: 'Бананы', unit: 'кг', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200' },
+      { id: 'p_f2', name: 'Яблоки', unit: 'кг', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200' },
+      { id: 'p_f3', name: 'Клубника', unit: 'кг', image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=200' },
+      { id: 'p_f4', name: 'Виноград', unit: 'кг', image: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=200' },
+      { id: 'p_f5', name: 'Персики', unit: 'кг', image: 'https://images.unsplash.com/photo-1629828874514-c1e5103f2150?w=200' },
+      { id: 'p_f6', name: 'Абрикосы', unit: 'кг', image: 'https://images.unsplash.com/photo-1595231776515-ddffb1f4d2b4?w=200' },
+      { id: 'p_f7', name: 'Нектарин', unit: 'кг', image: 'https://images.unsplash.com/photo-1582234372722-50d7ccc30ebd?w=200' },
+      { id: 'p_f8', name: 'Груши', unit: 'кг', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200' },
+      { id: 'p_f9', name: 'Манго', unit: 'шт', image: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=200' },
+      { id: 'p_f10', name: 'Голубика (Черника)', unit: 'кг', image: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=200' },
     ],
   },
   {
     category: 'Бакалея и Крупы',
     items: [
-      { id: 'p_b1', name: 'Вермишель', unit: 'уп' },
-      { id: 'p_b2', name: 'Рис', unit: 'уп' },
-      { id: 'p_b3', name: 'Гречка', unit: 'уп' },
-      { id: 'p_b4', name: 'Пшеничная крупа', unit: 'уп' },
-      { id: 'p_b5', name: 'Горох', unit: 'уп' },
-      { id: 'p_b6', name: 'Фасоль', unit: 'уп' },
-      { id: 'p_b7', name: 'Чечевица', unit: 'уп' },
-      { id: 'p_b8', name: 'Спагетти', unit: 'уп' },
-      { id: 'p_b9', name: 'Кофе', unit: 'уп' },
+      { id: 'p_b1', name: 'Вермишель', unit: 'уп', image: 'https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=200' },
+      { id: 'p_b2', name: 'Рис', unit: 'уп', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200' },
+      { id: 'p_b3', name: 'Гречка', unit: 'уп', image: 'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=200' },
+      { id: 'p_b4', name: 'Пшеничная крупа', unit: 'уп', image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=200' },
+      { id: 'p_b5', name: 'Горох', unit: 'уп', image: 'https://images.unsplash.com/photo-1592417817098-8f3d6ef23a63?w=200' },
+      { id: 'p_b6', name: 'Фасоль', unit: 'уп', image: 'https://images.unsplash.com/photo-1551462147-3a88588d445f?w=200' },
+      { id: 'p_b7', name: 'Чечевица', unit: 'уп', image: 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=200' },
+      { id: 'p_b8', name: 'Спагетти', unit: 'уп', image: 'https://images.unsplash.com/photo-1621996346565-e3d5d6288764?w=200' },
+      { id: 'p_b9', name: 'Кофе', unit: 'уп', image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200' },
     ],
   },
   {
     category: 'Выпечка и Хлеб',
     items: [
-      { id: 'p_h1', name: 'Хлеб Украинский', unit: 'шт' },
-      { id: 'p_h2', name: 'Батон', unit: 'шт' },
-      { id: 'p_h3', name: 'Багет', unit: 'шт' },
-      { id: 'p_h4', name: 'Чиабатта', unit: 'шт' },
-      { id: 'p_h5', name: 'Хлеб чёрный', unit: 'шт' },
+      { id: 'p_h1', name: 'Хлеб Украинский', unit: 'шт', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200' },
+      { id: 'p_h2', name: 'Батон', unit: 'шт', image: 'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=200' },
+      { id: 'p_h3', name: 'Багет', unit: 'шт', image: 'https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?w=200' },
+      { id: 'p_h4', name: 'Чиабатта', unit: 'шт', image: 'https://images.unsplash.com/photo-1598373182133-52452f7691ef?w=200' },
+      { id: 'p_h5', name: 'Хлеб чёрный', unit: 'шт', image: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=200' },
     ],
   },
   {
     category: 'Молочные продукты',
     items: [
-      { id: 'p_m1', name: 'Кефир', unit: 'л' },
-      { id: 'p_m2', name: 'Йогурт', unit: 'шт' },
-      { id: 'p_m3', name: 'Творог', unit: 'г' },
-      { id: 'p_m4', name: 'Закваска', unit: 'л' },
-      { id: 'p_m5', name: 'Молоко', unit: 'л' },
-      { id: 'p_m6', name: 'Сыр', unit: 'г' },
+      { id: 'p_m1', name: 'Кефир', unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200' },
+      { id: 'p_m2', name: 'Йогурт', unit: 'шт', image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200' },
+      { id: 'p_m3', name: 'Творог', unit: 'г', image: 'https://images.unsplash.com/photo-1559561853-08451507cbe7?w=200' },
+      { id: 'p_m4', name: 'Закваска', unit: 'л', image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200' },
+      { id: 'p_m5', name: 'Молоко', unit: 'л', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=200' },
+      { id: 'p_m6', name: 'Сыр', unit: 'г', image: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=200' },
     ],
   },
   {
     category: 'Мясо и Колбасы',
     items: [
-      { id: 'p_mk1', name: 'Колбаса докторская', unit: 'кг' },
-      { id: 'p_mk2', name: 'Колбаса сырокопчёная', unit: 'кг' },
-      { id: 'p_mk3', name: 'Свинина', unit: 'кг' },
-      { id: 'p_mk4', name: 'Сало', unit: 'кг' },
-      { id: 'p_mk5', name: 'Курица', unit: 'кг' },
+      { id: 'p_mk1', name: 'Колбаса докторская', unit: 'кг', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=200' },
+      { id: 'p_mk2', name: 'Колбаса сырокопчёная', unit: 'кг', image: 'https://images.unsplash.com/photo-1592686092794-6d9b3a4a7536?w=200' },
+      { id: 'p_mk3', name: 'Свинина', unit: 'кг', image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=200' },
+      { id: 'p_mk4', name: 'Сало', unit: 'кг', image: 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=200' },
+      { id: 'p_mk5', name: 'Курица', unit: 'кг', image: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=200' },
     ],
   },
   {
     category: 'Консервы',
     items: [
-      { id: 'p_kn1', name: 'Килька', unit: 'банка' },
-      { id: 'p_kn2', name: 'Бычки', unit: 'банка' },
-      { id: 'p_kn3', name: 'Консервы свинина', unit: 'банка' },
-      { id: 'p_kn4', name: 'Скумбрия', unit: 'банка' },
-      { id: 'p_kn5', name: 'Консервы курятина', unit: 'банка' },
-      { id: 'p_kn6', name: 'Консервы говядина', unit: 'банка' },
+      { id: 'p_kn1', name: 'Килька', unit: 'банка', image: 'https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=200' },
+      { id: 'p_kn2', name: 'Бычки', unit: 'банка', image: 'https://images.unsplash.com/photo-1605035075487-eb9568dfdf79?w=200' },
+      { id: 'p_kn3', name: 'Консервы свинина', unit: 'банка', image: 'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=200' },
+      { id: 'p_kn4', name: 'Скумбрия', unit: 'банка', image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=200' },
+      { id: 'p_kn5', name: 'Консервы курятина', unit: 'банка', image: 'https://images.unsplash.com/photo-1569058242252-623df46b5025?w=200' },
+      { id: 'p_kn6', name: 'Консервы говядина', unit: 'банка', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=200' },
     ],
   },
   {
     category: 'Бытовая химия',
     items: [
-      { id: 'p_ch1', name: 'Средство для унитаза', unit: 'шт' },
-      { id: 'p_ch2', name: 'Средство для ванной', unit: 'шт' },
-      { id: 'p_ch3', name: 'Средство для плиты', unit: 'шт' },
-      { id: 'p_ch4', name: 'Cif', unit: 'шт' },
-      { id: 'p_ch5', name: 'Fairy', unit: 'шт' },
+      { id: 'p_ch1', name: 'Средство для унитаза', unit: 'шт', image: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=200' },
+      { id: 'p_ch2', name: 'Средство для ванной', unit: 'шт', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200' },
+      { id: 'p_ch3', name: 'Средство для плиты', unit: 'шт', image: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=200' },
+      { id: 'p_ch4', name: 'Cif', unit: 'шт', image: 'https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=200' },
+      { id: 'p_ch5', name: 'Fairy', unit: 'шт', image: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=200' },
     ],
   },
   {
     category: 'Безалкогольные напитки',
     items: [
-      { id: 'p_dr1', name: 'Живчик', unit: 'л' },
-      { id: 'p_dr2', name: 'Вода', unit: 'л' },
-      { id: 'p_dr3', name: 'Пепси', unit: 'л' },
-      { id: 'p_dr4', name: 'Фанта', unit: 'л' },
-      { id: 'p_dr5', name: 'Кока-Кола', unit: 'л' },
-      { id: 'p_dr6', name: 'Спрайт', unit: 'л' },
-      { id: 'p_dr7', name: 'Байкал', unit: 'л' },
-      { id: 'p_dr8', name: 'Тархун', unit: 'л' },
-      { id: 'p_dr9', name: 'Питбуль', unit: 'л' },
-      { id: 'p_dr10', name: 'Моджо', unit: 'л' },
-      { id: 'p_dr11', name: 'Моршинская', unit: 'л' },
-      { id: 'p_dr12', name: 'Оболонская', unit: 'л' },
-      { id: 'p_dr13', name: 'Квас', unit: 'л' },
-      { id: 'p_dr14', name: 'Сок томатный', unit: 'л' },
-      { id: 'p_dr15', name: 'Сок апельсиновый', unit: 'л' },
-      { id: 'p_dr16', name: 'Сок виноградно-яблочный', unit: 'л' },
-      { id: 'p_dr17', name: 'Сок мультивитамин', unit: 'л' },
-      { id: 'p_dr18', name: 'Сок персиковый', unit: 'л' },
-      { id: 'p_dr19', name: 'Сок грейпфрутовый', unit: 'л' },
-      { id: 'p_dr20', name: 'Сок сицилийский апельсин', unit: 'л' },
+      { id: 'p_dr1', name: 'Живчик', unit: 'л', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200' },
+      { id: 'p_dr2', name: 'Вода', unit: 'л', image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=200' },
+      { id: 'p_dr3', name: 'Пепси', unit: 'л', image: 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=200' },
+      { id: 'p_dr4', name: 'Фанта', unit: 'л', image: 'https://images.unsplash.com/photo-1624517452488-04869289c4ca?w=200' },
+      { id: 'p_dr5', name: 'Кока-Кола', unit: 'л', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200' },
+      { id: 'p_dr6', name: 'Спрайт', unit: 'л', image: 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=200' },
+      { id: 'p_dr7', name: 'Байкал', unit: 'л', image: 'https://images.unsplash.com/photo-1527960471264-932f39eb5846?w=200' },
+      { id: 'p_dr8', name: 'Тархун', unit: 'л', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=200' },
+      { id: 'p_dr9', name: 'Питбуль', unit: 'л', image: 'https://images.unsplash.com/photo-1622543925917-763c34d1a86e?w=200' },
+      { id: 'p_dr10', name: 'Моджо', unit: 'л', image: 'https://images.unsplash.com/photo-1556881286-fc6915169721?w=200' },
+      { id: 'p_dr11', name: 'Моршинская', unit: 'л', image: 'https://images.unsplash.com/photo-1560023907-5f313c8754b9?w=200' },
+      { id: 'p_dr12', name: 'Оболонская', unit: 'л', image: 'https://images.unsplash.com/photo-1559839914-17aae19cec71?w=200' },
+      { id: 'p_dr13', name: 'Квас', unit: 'л', image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=200' },
+      { id: 'p_dr14', name: 'Сок томатный', unit: 'л', image: 'https://images.unsplash.com/photo-1546173159-315724a31696?w=200' },
+      { id: 'p_dr15', name: 'Сок апельсиновый', unit: 'л', image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=200' },
+      { id: 'p_dr16', name: 'Сок виноградно-яблочный', unit: 'л', image: 'https://images.unsplash.com/photo-1579705745070-a7593683a610?w=200' },
+      { id: 'p_dr17', name: 'Сок мультивитамин', unit: 'л', image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=200' },
+      { id: 'p_dr18', name: 'Сок персиковый', unit: 'л', image: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=200' },
+      { id: 'p_dr19', name: 'Сок грейпфрутовый', unit: 'л', image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=200' },
+      { id: 'p_dr20', name: 'Сок сицилийский апельсин', unit: 'л', image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=200' },
     ],
   },
   {
     category: 'Алкогольные напитки',
     items: [
-      { id: 'p_al1', name: 'Пиво', unit: 'л' },
-      { id: 'p_al2', name: 'Водка', unit: 'л' },
-      { id: 'p_al3', name: 'Виски', unit: 'л' },
-      { id: 'p_al4', name: 'Джин', unit: 'л' },
-      { id: 'p_al5', name: 'Ликёр', unit: 'л' },
+      { id: 'p_al1', name: 'Пиво', unit: 'л', image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=200' },
+      { id: 'p_al2', name: 'Водка', unit: 'л', image: 'https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?w=200' },
+      { id: 'p_al3', name: 'Виски', unit: 'л', image: 'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=200' },
+      { id: 'p_al4', name: 'Джин', unit: 'л', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=200' },
+      { id: 'p_al5', name: 'Ликёр', unit: 'л', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=200' },
     ],
   },
 ];
@@ -165,7 +165,7 @@ const TRANSLATIONS = {
     title: 'МОИ СПИСКИ',
     shareHeader: '🛒 СПИСОК ПОКУПОК:',
     addList: 'Создать список',
-    addItem: 'Добавить товар',
+    addItem: 'Добавить товар в библиотеку',
     editItem: 'Изменить товар',
     enterListName: 'Название списка',
     enterItemName: 'Название товара',
@@ -184,12 +184,21 @@ const TRANSLATIONS = {
     markCheck: 'Галочка',
     catalog: 'Библиотека товаров',
     defaultListName: 'Мой первый список',
+    themes: {
+      dark: 'Тёмная',
+      gray: 'Серая',
+      light: 'Светлая',
+    },
+    modes: {
+      grid: 'Плитка',
+      list: 'Минимализм',
+    },
   },
   en: {
     title: 'MY LISTS',
     shareHeader: '🛒 GROCERY LIST:',
     addList: 'Create List',
-    addItem: 'Add Item',
+    addItem: 'Add Item to Library',
     editItem: 'Edit Item',
     enterListName: 'List name',
     enterItemName: 'Item name',
@@ -208,6 +217,15 @@ const TRANSLATIONS = {
     markCheck: 'Checkmark',
     catalog: 'Product Library',
     defaultListName: 'My First List',
+    themes: {
+      dark: 'Dark',
+      gray: 'Gray',
+      light: 'Light',
+    },
+    modes: {
+      grid: 'Grid',
+      list: 'List',
+    },
   },
 };
 
@@ -220,7 +238,7 @@ const THEMES = {
 const TEXT_COLORS = [
   { label: 'Светло-серый', value: '#e6edf3' },
   { label: 'Голубой', value: '#00f0ff' },
-  { label: 'Синий', value: '#3b82f6' },
+  { label: 'Синий', value: '#3b82f6' }, // Третий цвет - Синий по умолчанию
   { label: 'Жёлтый', value: '#ffd700' },
   { label: 'Мятный', value: '#2ecc71' },
 ];
@@ -229,9 +247,10 @@ export default function App() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
+  // П.5 По умолчанию Light и 3-й цвет (Синий)
   const [lang, setLang] = useState('ru');
-  const [themeKey, setThemeKey] = useState('dark');
-  const [textColor, setTextColor] = useState('#00f0ff');
+  const [themeKey, setThemeKey] = useState('light');
+  const [textColor, setTextColor] = useState('#3b82f6');
   const [viewMode, setViewMode] = useState('grid');
   const [isViewLocked, setIsViewLocked] = useState(false);
   const [markStyle, setMarkStyle] = useState('color');
@@ -285,7 +304,7 @@ export default function App() {
       const savedLocked = await AsyncStorage.getItem('@app_view_locked');
       const savedMark = await AsyncStorage.getItem('@app_mark_style');
       const savedLists = await AsyncStorage.getItem('@app_grocery_lists_v2');
-      const savedCatalog = await AsyncStorage.getItem('@app_categorized_catalog_v4');
+      const savedCatalog = await AsyncStorage.getItem('@app_categorized_catalog_v5');
 
       if (savedLang) setLang(JSON.parse(savedLang));
       if (savedTheme) setThemeKey(JSON.parse(savedTheme));
@@ -300,7 +319,7 @@ export default function App() {
         masterCat = mergeCatalogs(DEFAULT_CATEGORIZED_PRESETS, parsed);
       }
       setCategorizedCatalog(masterCat);
-      await AsyncStorage.setItem('@app_categorized_catalog_v4', JSON.stringify(masterCat));
+      await AsyncStorage.setItem('@app_categorized_catalog_v5', JSON.stringify(masterCat));
 
       if (savedLists) {
         setLists(JSON.parse(savedLists));
@@ -328,11 +347,14 @@ export default function App() {
         result.push(defCat);
       } else {
         defCat.items.forEach((defItem) => {
-          const exists = result[catIndex].items.some(
+          const itemIdx = result[catIndex].items.findIndex(
             (i) => i.name.toLowerCase() === defItem.name.toLowerCase()
           );
-          if (!exists) {
+          if (itemIdx === -1) {
             result[catIndex].items.push(defItem);
+          } else if (!result[catIndex].items[itemIdx].image && defItem.image) {
+            // Восстанавливаем картинку, если в хранилище её не было
+            result[catIndex].items[itemIdx].image = defItem.image;
           }
         });
       }
@@ -347,7 +369,7 @@ export default function App() {
 
   const saveCategorizedCatalog = async (newCatalog) => {
     setCategorizedCatalog(newCatalog);
-    await AsyncStorage.setItem('@app_categorized_catalog_v4', JSON.stringify(newCatalog));
+    await AsyncStorage.setItem('@app_categorized_catalog_v5', JSON.stringify(newCatalog));
   };
 
   const saveSetting = async (key, value, setter) => {
@@ -498,12 +520,31 @@ export default function App() {
     ]);
   };
 
-  // Метод сохранения товара: добавляется в БИБЛИОТЕКУ и одновременно В ТЕКУЩИЙ СПИСОК
+  // П.2 Сохранение товара: ИСКЛЮЧИТЕЛЬНО в Библиотеку! Без автодобавления в текущий список.
   const handleSaveItem = () => {
     if (!itemName.trim()) return;
     const trimmedName = itemName.trim();
-    const countVal = parseFloat(itemCount) || 1;
 
+    // Редактирование существующего товара в текущем списке
+    if (editingItemId && currentListId) {
+      const countVal = parseFloat(itemCount) || 1;
+      const updatedLists = lists.map((list) => {
+        if (list.id === currentListId) {
+          const updatedItems = list.items.map((i) =>
+            i.id === editingItemId
+              ? { ...i, name: trimmedName, count: countVal, unit: itemUnit, image: itemImage }
+              : i
+          );
+          return { ...list, items: updatedItems };
+        }
+        return list;
+      });
+      saveLists(updatedLists);
+      closeItemModal();
+      return;
+    }
+
+    // Создание НОВОГО товара в конкретную категорию БИБЛИОТЕКИ
     let targetCatName = targetCategoryForNewItem || 'Разное';
     const catExists = categorizedCatalog.some((c) => c.category === targetCatName);
     if (!catExists) {
@@ -538,51 +579,12 @@ export default function App() {
       saveCategorizedCatalog(updatedCat);
     }
 
-    if (currentListId) {
-      const updatedLists = lists.map((list) => {
-        if (list.id === currentListId) {
-          if (editingItemId) {
-            const updatedItems = list.items.map((i) =>
-              i.id === editingItemId
-                ? {
-                    ...i,
-                    name: trimmedName,
-                    count: countVal,
-                    unit: itemUnit,
-                    image: itemImage,
-                  }
-                : i
-            );
-            return { ...list, items: updatedItems };
-          } else {
-            const existsInList = list.items.some(
-              (i) => i.name.toLowerCase() === trimmedName.toLowerCase()
-            );
-            if (!existsInList) {
-              const newItem = {
-                id: Date.now().toString() + Math.random().toString().substr(2, 4),
-                name: trimmedName,
-                count: countVal,
-                unit: itemUnit,
-                image: itemImage,
-                bought: false,
-              };
-              return { ...list, items: [...list.items, newItem] };
-            }
-          }
-        }
-        return list;
-      });
-      saveLists(updatedLists);
-    }
-
     closeItemModal();
   };
 
   const createAndSelectFromSearch = (queryName) => {
     if (!queryName.trim()) return;
     const trimmed = queryName.trim();
-    const targetCat = categorizedCatalog[0]?.category || 'Разное';
 
     const newPreset = {
       id: Date.now().toString() + Math.random().toString().substr(2, 4),
@@ -714,7 +716,7 @@ export default function App() {
     }
   };
 
-  // Живой поиск по каталогу
+  // Поисковая строка в библиотеке товаров
   const searchResults = React.useMemo(() => {
     if (!catalogSearchQuery.trim()) return [];
     const query = catalogSearchQuery.toLowerCase().trim();
@@ -976,19 +978,18 @@ export default function App() {
         />
       )}
 
-      {/* Кнопка Плюс */}
+      {/* П.1 Кнопка Плюс: Нажатие при открытом списке автоматически открывает Библиотеку */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: textColor }]}
         onPress={() => {
           if (!currentListId) {
             setListModalVisible(true);
           } else {
-            closeItemModal();
-            setItemModalVisible(true);
+            setCatalogModalVisible(true);
           }
         }}
       >
-        <Ionicons name="add" size={32} color="#080a0d" />
+        <Ionicons name="add" size={32} color="#ffffff" />
       </TouchableOpacity>
 
       {/* Модалка создания списка */}
@@ -1021,7 +1022,7 @@ export default function App() {
                     onPress={handleCreateList}
                     style={[styles.btnSave, { backgroundColor: textColor }]}
                   >
-                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>{t.save}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1069,7 +1070,7 @@ export default function App() {
                     style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
                     onPress={() => pickImageFromGallery(setItemImage)}
                   >
-                    <Ionicons name="image-outline" size={20} color="#080a0d" />
+                    <Ionicons name="image-outline" size={20} color="#ffffff" />
                   </TouchableOpacity>
                 </View>
 
@@ -1085,7 +1086,7 @@ export default function App() {
                     >
                       <Text
                         style={{
-                          color: itemUnit === u ? '#080a0d' : currentTheme.textDefault,
+                          color: itemUnit === u ? '#ffffff' : currentTheme.textDefault,
                           fontWeight: 'bold',
                         }}
                       >
@@ -1103,7 +1104,7 @@ export default function App() {
                     onPress={handleSaveItem}
                     style={[styles.btnSave, { backgroundColor: textColor }]}
                   >
-                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>{t.save}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1112,7 +1113,7 @@ export default function App() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Модалка Библиотеки товаров С ПОИСКОМ */}
+      {/* Модалка Библиотеки товаров */}
       <Modal
         visible={catalogModalVisible}
         animationType="slide"
@@ -1125,7 +1126,7 @@ export default function App() {
               <View style={[styles.modalContent, { height: '88%', backgroundColor: currentTheme.cardBg }]}>
                 <Text style={[styles.modalHeader, { color: textColor }]}>{t.catalog}</Text>
 
-                {/* Поисковая строка вверху библиотеки */}
+                {/* Поисковая строка */}
                 <View style={styles.searchBarContainer}>
                   <Ionicons name="search-outline" size={20} color="#888" style={{ marginRight: 8 }} />
                   <TextInput
@@ -1143,7 +1144,6 @@ export default function App() {
                 </View>
 
                 <ScrollView style={{ flex: 1, marginVertical: 10 }}>
-                  {/* Живая выдача результатов поиска */}
                   {catalogSearchQuery.trim().length > 0 ? (
                     <View>
                       <Text style={{ color: textColor, fontWeight: 'bold', marginBottom: 10 }}>
@@ -1214,7 +1214,7 @@ export default function App() {
                       )}
                     </View>
                   ) : (
-                    /* Обычный режим просмотра библиотеки категорий */
+                    /* Библиотека категорий */
                     categorizedCatalog.map((catGroup) => {
                       const isExpanded = !!expandedCategories[catGroup.category];
                       return (
@@ -1300,7 +1300,7 @@ export default function App() {
                   onPress={applySelectedCatalogItems}
                   style={[styles.btnSave, { backgroundColor: textColor, alignSelf: 'center', width: '100%' }]}
                 >
-                  <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
+                  <Text style={{ color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
                     ОК
                   </Text>
                 </TouchableOpacity>
@@ -1338,7 +1338,7 @@ export default function App() {
                     style={[styles.btnSave, { backgroundColor: textColor, justifyContent: 'center' }]}
                     onPress={() => pickImageFromGallery(setCatalogEditImage)}
                   >
-                    <Ionicons name="image-outline" size={20} color="#080a0d" />
+                    <Ionicons name="image-outline" size={20} color="#ffffff" />
                   </TouchableOpacity>
                 </View>
 
@@ -1353,7 +1353,7 @@ export default function App() {
                     onPress={handleSaveCatalogImage}
                     style={[styles.btnSave, { backgroundColor: textColor }]}
                   >
-                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>{t.save}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1392,7 +1392,7 @@ export default function App() {
                     onPress={saveDirectQty}
                     style={[styles.btnSave, { backgroundColor: textColor }]}
                   >
-                    <Text style={{ color: '#080a0d', fontWeight: 'bold' }}>{t.save}</Text>
+                    <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>{t.save}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1425,13 +1425,14 @@ export default function App() {
                       ]}
                       onPress={() => saveSetting('@app_lang', l, setLang)}
                     >
-                      <Text style={{ color: lang === l ? '#000' : currentTheme.textDefault }}>
+                      <Text style={{ color: lang === l ? '#ffffff' : currentTheme.textDefault }}>
                         {l.toUpperCase()}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
 
+                {/* П.3 Динамический перевод названий тем */}
                 <Text style={styles.sectionLabel}>{t.theme}</Text>
                 <View style={styles.rowPicker}>
                   {['dark', 'gray', 'light'].map((k) => (
@@ -1443,8 +1444,8 @@ export default function App() {
                       ]}
                       onPress={() => saveSetting('@app_theme_key', k, setThemeKey)}
                     >
-                      <Text style={{ color: themeKey === k ? '#000' : currentTheme.textDefault }}>
-                        {k.toUpperCase()}
+                      <Text style={{ color: themeKey === k ? '#ffffff' : currentTheme.textDefault }}>
+                        {t.themes[k]}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -1458,13 +1459,14 @@ export default function App() {
                       style={[
                         styles.colorCircle,
                         { backgroundColor: c.value },
-                        textColor === c.value && { borderWidth: 2, borderColor: '#fff' },
+                        textColor === c.value && { borderWidth: 2, borderColor: '#000' },
                       ]}
                       onPress={() => saveSetting('@app_text_color', c.value, setTextColor)}
                     />
                   ))}
                 </View>
 
+                {/* П.3 Динамический перевод режимов отображения */}
                 <Text style={styles.sectionLabel}>{t.viewMode}</Text>
                 <View style={styles.rowPicker}>
                   <TouchableOpacity
@@ -1474,8 +1476,8 @@ export default function App() {
                     ]}
                     onPress={() => saveSetting('@app_view_mode', 'grid', setViewMode)}
                   >
-                    <Text style={{ color: viewMode === 'grid' ? '#000' : currentTheme.textDefault }}>
-                      Плитка
+                    <Text style={{ color: viewMode === 'grid' ? '#ffffff' : currentTheme.textDefault }}>
+                      {t.modes.grid}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -1485,8 +1487,8 @@ export default function App() {
                     ]}
                     onPress={() => saveSetting('@app_view_mode', 'list', setViewMode)}
                   >
-                    <Text style={{ color: viewMode === 'list' ? '#000' : currentTheme.textDefault }}>
-                      Минимализм
+                    <Text style={{ color: viewMode === 'list' ? '#ffffff' : currentTheme.textDefault }}>
+                      {t.modes.list}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1511,7 +1513,7 @@ export default function App() {
                     ]}
                     onPress={() => saveSetting('@app_mark_style', 'color', setMarkStyle)}
                   >
-                    <Text style={{ color: markStyle === 'color' ? '#000' : currentTheme.textDefault }}>
+                    <Text style={{ color: markStyle === 'color' ? '#ffffff' : currentTheme.textDefault }}>
                       {t.markColor}
                     </Text>
                   </TouchableOpacity>
@@ -1522,7 +1524,7 @@ export default function App() {
                     ]}
                     onPress={() => saveSetting('@app_mark_style', 'check', setMarkStyle)}
                   >
-                    <Text style={{ color: markStyle === 'check' ? '#000' : currentTheme.textDefault }}>
+                    <Text style={{ color: markStyle === 'check' ? '#ffffff' : currentTheme.textDefault }}>
                       {t.markCheck}
                     </Text>
                   </TouchableOpacity>
@@ -1532,7 +1534,7 @@ export default function App() {
                   onPress={() => setSettingsVisible(false)}
                   style={[styles.btnSave, { backgroundColor: textColor, marginTop: 16 }]}
                 >
-                  <Text style={{ color: '#080a0d', fontWeight: 'bold', textAlign: 'center' }}>
+                  <Text style={{ color: '#ffffff', fontWeight: 'bold', textAlign: 'center' }}>
                     ОК
                   </Text>
                 </TouchableOpacity>
@@ -1635,7 +1637,7 @@ const styles = StyleSheet.create({
   },
   modalHeader: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
@@ -1645,7 +1647,7 @@ const styles = StyleSheet.create({
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 10,
@@ -1659,7 +1661,7 @@ const styles = StyleSheet.create({
   categoryAccordion: {
     marginBottom: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
     overflow: 'hidden',
   },
   categoryHeader: {
@@ -1676,7 +1678,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
     padding: 8,
     borderRadius: 8,
     marginBottom: 6,
@@ -1706,7 +1708,7 @@ const styles = StyleSheet.create({
   },
 
   unitContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 6 },
-  unitBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: 'rgba(255, 255, 255, 0.08)' },
+  unitBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6, backgroundColor: 'rgba(0, 0, 0, 0.05)' },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
   btnCancel: { padding: 10 },
   btnSave: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 6 },
@@ -1714,6 +1716,6 @@ const styles = StyleSheet.create({
   sectionLabel: { color: '#888', fontSize: 13, marginTop: 10, marginBottom: 8 },
   rowPicker: { flexDirection: 'row', gap: 10, marginBottom: 12, flexWrap: 'wrap' },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 8 },
-  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, backgroundColor: 'rgba(255, 255, 255, 0.08)' },
+  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, backgroundColor: 'rgba(0, 0, 0, 0.08)' },
   colorCircle: { width: 32, height: 32, borderRadius: 16 },
 });

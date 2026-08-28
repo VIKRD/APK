@@ -247,7 +247,7 @@ export default function App() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  // П.5 По умолчанию Light и 3-й цвет (Синий)
+  // По умолчанию Light и 3-й цвет (Синий)
   const [lang, setLang] = useState('ru');
   const [themeKey, setThemeKey] = useState('light');
   const [textColor, setTextColor] = useState('#3b82f6');
@@ -520,12 +520,12 @@ export default function App() {
     ]);
   };
 
-  // П.2 Сохранение товара: ИСКЛЮЧИТЕЛЬНО в Библиотеку! Без автодобавления в текущий список.
+  // ИСПРАВЛЕННОЕ СОХРАНЕНИЕ ТОВАРА
   const handleSaveItem = () => {
     if (!itemName.trim()) return;
     const trimmedName = itemName.trim();
 
-    // Редактирование существующего товара в текущем списке
+    // 1. Редактирование существующего товара в текущем активном списке
     if (editingItemId && currentListId) {
       const countVal = parseFloat(itemCount) || 1;
       const updatedLists = lists.map((list) => {
@@ -544,50 +544,49 @@ export default function App() {
       return;
     }
 
-    // Создание НОВОГО товара в конкретную категорию БИБЛИОТЕКИ
-let targetCatName = targetCategoryForNewItem;
+    // 2. Добавление товара в библиотеку
+    let targetCatName = targetCategoryForNewItem || 'Разное';
 
-// 1. Проверяем, существует ли переданная категория (без учёта регистра)
-const existingCat = categorizedCatalog.find(
-  (c) => c.category.trim().toLowerCase() === (targetCatName || '').trim().toLowerCase()
-);
+    const newProduct = {
+      id: Date.now().toString() + Math.random().toString().substr(2, 4),
+      name: trimmedName,
+      unit: itemUnit,
+      image: itemImage,
+    };
 
-if (existingCat) {
-  // Используем точное имя категории из базы
-  targetCatName = existingCat.category;
-} else {
-  // Если категория не передана или не найдена — берем текущую выбранную или fallback
-  targetCatName = targetCategoryForNewItem || 'Разное';
-}
+    let catFound = false;
 
-// 2. Проверяем, есть ли уже такой товар в библиотеке
-let isItemInCatalog = false;
-categorizedCatalog.forEach((c) => {
-  if (c.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase())) {
-    isItemInCatalog = true;
-  }
-});
-
-    if (!isItemInCatalog) {
-      const updatedCat = categorizedCatalog.map((cat) => {
-        if (cat.category === targetCatName) {
+    // Сравнение имен категорий без учета регистра
+    let updatedCat = categorizedCatalog.map((cat) => {
+      if (cat.category.trim().toLowerCase() === targetCatName.trim().toLowerCase()) {
+        catFound = true;
+        targetCatName = cat.category; // Фиксируем точное имя из базы
+        const exists = cat.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
+        if (!exists) {
           return {
             ...cat,
-            items: [
-              ...cat.items,
-              {
-                id: Date.now().toString() + Math.random().toString().substr(2, 4),
-                name: trimmedName,
-                unit: itemUnit,
-                image: itemImage,
-              },
-            ],
+            items: [...cat.items, newProduct],
           };
         }
-        return cat;
+      }
+      return cat;
+    });
+
+    // Создаем категорию, если её ещё нет в структуре
+    if (!catFound) {
+      updatedCat.push({
+        category: targetCatName,
+        items: [newProduct],
       });
-      saveCategorizedCatalog(updatedCat);
     }
+
+    saveCategorizedCatalog(updatedCat);
+
+    // Раскрываем категорию, куда добавили товар
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [targetCatName]: true,
+    }));
 
     closeItemModal();
   };
@@ -988,7 +987,7 @@ categorizedCatalog.forEach((c) => {
         />
       )}
 
-      {/* П.1 Кнопка Плюс: Нажатие при открытом списке автоматически открывает Библиотеку */}
+      {/* Кнопка Плюс */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: textColor }]}
         onPress={() => {
@@ -1442,7 +1441,6 @@ categorizedCatalog.forEach((c) => {
                   ))}
                 </View>
 
-                {/* П.3 Динамический перевод названий тем */}
                 <Text style={styles.sectionLabel}>{t.theme}</Text>
                 <View style={styles.rowPicker}>
                   {['dark', 'gray', 'light'].map((k) => (
@@ -1476,7 +1474,6 @@ categorizedCatalog.forEach((c) => {
                   ))}
                 </View>
 
-                {/* П.3 Динамический перевод режимов отображения */}
                 <Text style={styles.sectionLabel}>{t.viewMode}</Text>
                 <View style={styles.rowPicker}>
                   <TouchableOpacity

@@ -24,6 +24,7 @@ import * as ImagePicker from 'expo-image-picker';
 // Дефолтный ассортимент с картинками Unsplash для каждого товара
 const DEFAULT_CATEGORIZED_PRESETS = [
   {
+    id: 'p_c',
     category: 'Овощи и Зелень',
     items: [
       { id: 'p_c1', name: 'Огурцы', unit: 'кг', image: 'https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=200' },
@@ -43,6 +44,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_f',
     category: 'Фрукты и Ягоды',
     items: [
       { id: 'p_f1', name: 'Бананы', unit: 'кг', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200' },
@@ -58,6 +60,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_b',
     category: 'Бакалея и Крупы',
     items: [
       { id: 'p_b1', name: 'Вермишель', unit: 'уп', image: 'https://images.unsplash.com/photo-1551462147-ff29053bfc14?w=200' },
@@ -72,6 +75,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_h',
     category: 'Выпечка и Хлеб',
     items: [
       { id: 'p_h1', name: 'Хлеб Украинский', unit: 'шт', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200' },
@@ -82,6 +86,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_m',
     category: 'Молочные продукты',
     items: [
       { id: 'p_m1', name: 'Кефир', unit: 'л', image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200' },
@@ -93,6 +98,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_mk',
     category: 'Мясо и Колбасы',
     items: [
       { id: 'p_mk1', name: 'Колбаса докторская', unit: 'кг', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=200' },
@@ -103,6 +109,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_kn',
     category: 'Консервы',
     items: [
       { id: 'p_kn1', name: 'Килька', unit: 'банка', image: 'https://images.unsplash.com/photo-1534483509719-3feaee7c30da?w=200' },
@@ -114,6 +121,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_ch',
     category: 'Бытовая химия',
     items: [
       { id: 'p_ch1', name: 'Средство для унитаза', unit: 'шт', image: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=200' },
@@ -124,6 +132,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_dr',
     category: 'Безалкогольные напитки',
     items: [
       { id: 'p_dr1', name: 'Живчик', unit: 'л', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200' },
@@ -149,6 +158,7 @@ const DEFAULT_CATEGORIZED_PRESETS = [
     ],
   },
   {
+    id: 'p_al',
     category: 'Алкогольные напитки',
     items: [
       { id: 'p_al1', name: 'Пиво', unit: 'л', image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=200' },
@@ -157,6 +167,11 @@ const DEFAULT_CATEGORIZED_PRESETS = [
       { id: 'p_al4', name: 'Джин', unit: 'л', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=200' },
       { id: 'p_al5', name: 'Ликёр', unit: 'л', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=200' },
     ],
+  },
+  {
+    id: 'p_o',
+    category: 'Разное',
+    items: [],
   },
 ];
 
@@ -343,6 +358,9 @@ export default function App() {
       if (catIndex === -1) {
         result.push(defCat);
       } else {
+        if (!result[catIndex].id) {
+          result[catIndex].id = defCat.id;
+        }
         defCat.items.forEach((defItem) => {
           const itemIdx = result[catIndex].items.findIndex(
             (i) => i.name.toLowerCase() === defItem.name.toLowerCase()
@@ -424,7 +442,7 @@ export default function App() {
       );
       if (!exists) {
         currentItems.push({
-          id: Date.now().toString() + Math.random().toString().substr(2, 4),
+          id: preset.id || Date.now().toString() + Math.random().toString().substr(2, 4),
           name: preset.name,
           count: 1,
           unit: preset.unit || 'шт',
@@ -516,7 +534,22 @@ export default function App() {
     ]);
   };
 
-  // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ/ДОБАВЛЕНИЯ ТОВАРА
+  // ФУНКЦИЯ ГЕНЕРАЦИИ СЛЕДУЮЩЕГО ID ДЛЯ ТОВАРА В КАТЕГОРИИ
+  const generateNextItemId = (catId, items) => {
+    const prefix = catId;
+    let maxNum = 0;
+    items.forEach((item) => {
+      if (item.id && item.id.startsWith(prefix)) {
+        const numPart = parseInt(item.id.replace(prefix, ''), 10);
+        if (!isNaN(numPart) && numPart > maxNum) {
+          maxNum = numPart;
+        }
+      }
+    });
+    return `${prefix}${maxNum + 1}`;
+  };
+
+  // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ/ДОБАВЛЕНИЯ ТОВАРА С АВТОПРИСВОЕНИЕМ ID
   const handleSaveItem = () => {
     if (!itemName.trim()) return;
     const trimmedName = itemName.trim();
@@ -542,13 +575,7 @@ export default function App() {
 
     // 2. Создание абсолютно нового товара
     let targetCatName = targetCategoryForNewItem || 'Разное';
-
-    const newCatalogProduct = {
-      id: Date.now().toString() + Math.random().toString().substr(2, 4),
-      name: trimmedName,
-      unit: itemUnit,
-      image: itemImage,
-    };
+    let newProductId = '';
 
     let catFound = false;
 
@@ -559,20 +586,54 @@ export default function App() {
         targetCatName = cat.category;
         const exists = cat.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
         if (!exists) {
+          const catPrefix = cat.id || 'p_o';
+          newProductId = generateNextItemId(catPrefix, cat.items);
+          const newCatalogProduct = {
+            id: newProductId,
+            name: trimmedName,
+            unit: itemUnit,
+            image: itemImage,
+          };
           return {
             ...cat,
             items: [...cat.items, newCatalogProduct],
           };
+        } else {
+          const existingItem = cat.items.find((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
+          if (existingItem) {
+            newProductId = existingItem.id;
+          }
         }
       }
       return cat;
     });
 
     if (!catFound) {
-      updatedCat.push({
-        category: targetCatName,
-        items: [newCatalogProduct],
-      });
+      const catPrefix = 'p_o';
+      let otherCat = updatedCat.find((c) => c.category === 'Разное');
+      const itemsInOther = otherCat ? otherCat.items : [];
+      newProductId = generateNextItemId(catPrefix, itemsInOther);
+
+      const newCatalogProduct = {
+        id: newProductId,
+        name: trimmedName,
+        unit: itemUnit,
+        image: itemImage,
+      };
+
+      if (otherCat) {
+        updatedCat = updatedCat.map((cat) =>
+          cat.category === 'Разное'
+            ? { ...cat, items: [...cat.items, newCatalogProduct] }
+            : cat
+        );
+      } else {
+        updatedCat.push({
+          id: 'p_o',
+          category: 'Разное',
+          items: [newCatalogProduct],
+        });
+      }
     }
 
     saveCategorizedCatalog(updatedCat);
@@ -580,7 +641,10 @@ export default function App() {
     // Добавление напрямую в текущий активный список покупок
     if (currentListId) {
       const newItemForList = {
-        ...newCatalogProduct,
+        id: newProductId || Date.now().toString() + Math.random().toString().substr(2, 4),
+        name: trimmedName,
+        unit: itemUnit,
+        image: itemImage,
         count: countVal,
         bought: false,
       };
@@ -610,15 +674,16 @@ export default function App() {
     if (!queryName.trim()) return;
     const trimmed = queryName.trim();
 
-    const newPreset = {
-      id: Date.now().toString() + Math.random().toString().substr(2, 4),
-      name: trimmed,
-      unit: 'шт',
-      image: '',
-    };
-
-    const updatedCat = categorizedCatalog.map((cat, idx) => {
-      if (idx === 0) {
+    let newProductId = '';
+    const updatedCat = categorizedCatalog.map((cat) => {
+      if (cat.category === 'Разное' || cat.id === 'p_o') {
+        newProductId = generateNextItemId(cat.id || 'p_o', cat.items);
+        const newPreset = {
+          id: newProductId,
+          name: trimmed,
+          unit: 'шт',
+          image: '',
+        };
         return {
           ...cat,
           items: [...cat.items, newPreset],
@@ -627,8 +692,15 @@ export default function App() {
       return cat;
     });
 
+    const newPresetObj = {
+      id: newProductId,
+      name: trimmed,
+      unit: 'шт',
+      image: '',
+    };
+
     saveCategorizedCatalog(updatedCat);
-    toggleSelectCatalogItem(newPreset);
+    toggleSelectCatalogItem(newPresetObj);
     setCatalogSearchQuery('');
   };
 
@@ -1241,7 +1313,7 @@ export default function App() {
                     categorizedCatalog.map((catGroup) => {
                       const isExpanded = !!expandedCategories[catGroup.category];
                       return (
-                        <View key={catGroup.category} style={styles.categoryAccordion}>
+                        <View key={catGroup.id || catGroup.category} style={styles.categoryAccordion}>
                           <TouchableOpacity
                             style={[styles.categoryHeader, { borderBottomColor: currentTheme.border }]}
                             onPress={() => toggleCategory(catGroup.category)}

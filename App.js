@@ -1687,7 +1687,7 @@ const styles = StyleSheet.create({
   },
   categoryHeader: {
     flexDirection: 'row',
-    justify.content: 'space-between',
+    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 12,
     borderBottomWidth: 1,

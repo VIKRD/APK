@@ -238,7 +238,7 @@ const THEMES = {
 const TEXT_COLORS = [
   { label: 'Светло-серый', value: '#e6edf3' },
   { label: 'Голубой', value: '#00f0ff' },
-  { label: 'Синий', value: '#3b82f6' }, // Третий цвет - Синий по умолчанию
+  { label: 'Синий', value: '#3b82f6' },
   { label: 'Жёлтый', value: '#ffd700' },
   { label: 'Мятный', value: '#2ecc71' },
 ];
@@ -247,7 +247,6 @@ export default function App() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  // По умолчанию Light и 3-й цвет (Синий)
   const [lang, setLang] = useState('ru');
   const [themeKey, setThemeKey] = useState('light');
   const [textColor, setTextColor] = useState('#3b82f6');
@@ -259,12 +258,10 @@ export default function App() {
   const [categorizedCatalog, setCategorizedCatalog] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
 
-  // Аккордеон и поиск в библиотеке
   const [expandedCategories, setExpandedCategories] = useState({});
   const [selectedCatalogItems, setSelectedCatalogItems] = useState({});
   const [catalogSearchQuery, setCatalogSearchQuery] = useState('');
 
-  // Категория для добавления вручную
   const [targetCategoryForNewItem, setTargetCategoryForNewItem] = useState(null);
 
   const [listModalVisible, setListModalVisible] = useState(false);
@@ -353,7 +350,6 @@ export default function App() {
           if (itemIdx === -1) {
             result[catIndex].items.push(defItem);
           } else if (!result[catIndex].items[itemIdx].image && defItem.image) {
-            // Восстанавливаем картинку, если в хранилище её не было
             result[catIndex].items[itemIdx].image = defItem.image;
           }
         });
@@ -520,14 +516,14 @@ export default function App() {
     ]);
   };
 
-  // ИСПРАВЛЕННОЕ СОХРАНЕНИЕ ТОВАРА
+  // ИСПРАВЛЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ/ДОБАВЛЕНИЯ ТОВАРА
   const handleSaveItem = () => {
     if (!itemName.trim()) return;
     const trimmedName = itemName.trim();
+    const countVal = parseFloat(itemCount) || 1;
 
     // 1. Редактирование существующего товара в текущем активном списке
     if (editingItemId && currentListId) {
-      const countVal = parseFloat(itemCount) || 1;
       const updatedLists = lists.map((list) => {
         if (list.id === currentListId) {
           const updatedItems = list.items.map((i) =>
@@ -544,10 +540,10 @@ export default function App() {
       return;
     }
 
-    // 2. Добавление товара в библиотеку
+    // 2. Создание абсолютно нового товара
     let targetCatName = targetCategoryForNewItem || 'Разное';
 
-    const newProduct = {
+    const newCatalogProduct = {
       id: Date.now().toString() + Math.random().toString().substr(2, 4),
       name: trimmedName,
       unit: itemUnit,
@@ -556,33 +552,52 @@ export default function App() {
 
     let catFound = false;
 
-    // Сравнение имен категорий без учета регистра
+    // Добавление в библиотеку по категориям (Master Catalog)
     let updatedCat = categorizedCatalog.map((cat) => {
       if (cat.category.trim().toLowerCase() === targetCatName.trim().toLowerCase()) {
         catFound = true;
-        targetCatName = cat.category; // Фиксируем точное имя из базы
+        targetCatName = cat.category;
         const exists = cat.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
         if (!exists) {
           return {
             ...cat,
-            items: [...cat.items, newProduct],
+            items: [...cat.items, newCatalogProduct],
           };
         }
       }
       return cat;
     });
 
-    // Создаем категорию, если её ещё нет в структуре
     if (!catFound) {
       updatedCat.push({
         category: targetCatName,
-        items: [newProduct],
+        items: [newCatalogProduct],
       });
     }
 
     saveCategorizedCatalog(updatedCat);
 
-    // Раскрываем категорию, куда добавили товар
+    // Добавление напрямую в текущий активный список покупок
+    if (currentListId) {
+      const newItemForList = {
+        ...newCatalogProduct,
+        count: countVal,
+        bought: false,
+      };
+
+      const updatedLists = lists.map((list) => {
+        if (list.id === currentListId) {
+          const exists = list.items.some((i) => i.name.toLowerCase() === trimmedName.toLowerCase());
+          if (!exists) {
+            return { ...list, items: [...list.items, newItemForList] };
+          }
+        }
+        return list;
+      });
+      saveLists(updatedLists);
+    }
+
+    // Автоматическое раскрытие категории в UI
     setExpandedCategories((prev) => ({
       ...prev,
       [targetCatName]: true,
@@ -725,7 +740,6 @@ export default function App() {
     }
   };
 
-  // Поисковая строка в библиотеке товаров
   const searchResults = React.useMemo(() => {
     if (!catalogSearchQuery.trim()) return [];
     const query = catalogSearchQuery.toLowerCase().trim();
@@ -1673,7 +1687,7 @@ const styles = StyleSheet.create({
   },
   categoryHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justify.content: 'space-between',
     alignItems: 'center',
     padding: 12,
     borderBottomWidth: 1,
